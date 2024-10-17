@@ -1,12 +1,12 @@
 class ObjectifSante {
   final int id;
   final String nom;
-  final String description;
+  final String? description;
 
   ObjectifSante({
     required this.id,
     required this.nom,
-    required this.description,
+    this.description,
   });
 
   factory ObjectifSante.fromJson(Map<String, dynamic> json) {
@@ -16,5 +16,12 @@ class ObjectifSante {
       description: json['description'],
     );
   }
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nom': nom,
+      'description': description,
+    };
+  }
+}

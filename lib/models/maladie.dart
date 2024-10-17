@@ -1,12 +1,12 @@
 class Maladie {
   final int id;
   final String nom;
-  final String description;
+  final String? description;
 
   Maladie({
     required this.id,
     required this.nom,
-    required this.description,
+    this.description,
   });
 
   factory Maladie.fromJson(Map<String, dynamic> json) {
@@ -15,5 +15,13 @@ class Maladie {
       nom: json['nom'],
       description: json['description'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nom': nom,
+      'description': description,
+    };
   }
 }

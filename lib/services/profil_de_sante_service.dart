@@ -1,47 +1,92 @@
 import 'dart:convert';
+import 'package:equilibromobile/models/profil_sante.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config.dart'; // Assurez-vous que la baseUrl est définie dans config.dart
+import '../config.dart'; 
 
 class ProfilDeSanteService {
-  static const String baseUrl = AppConfig.baseUrl + "/api/profils-de-sante";
 
-  // Méthode pour récupérer le profil de l'utilisateur connecté
-  Future<Map<String, dynamic>?> obtenirMonProfil() async {
-    // Récupérer le token JWT depuis SharedPreferences
+static const String baseUrl = AppConfig.baseUrl + "/profils-de-sante";
+
+
+Future<Map<String, dynamic>?> obtenirMonProfil() async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
 
     if (token == null) {
-      print("Erreur : Aucun token JWT trouvé. Veuillez vous connecter.");
       throw Exception("Utilisateur non authentifié.");
     }
 
-    print('Token JWT utilisé : $token'); // Debug pour s’assurer que le token est correct
-
     try {
-      // Envoyer une requête GET avec le token dans le header Authorization
       final response = await http.get(
         Uri.parse('$baseUrl/mon-profil'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // Ajout du token JWT correctement formaté
+          'Authorization': 'Bearer $token',
         },
       );
 
-      print("Réponse API : ${response.statusCode}");
-      print("Corps de la réponse : ${response.body}");
-
       if (response.statusCode == 200) {
-        // Retourner les données du profil sous forme de Map
         return jsonDecode(response.body);
       } else {
-        print("Erreur lors de la récupération du profil : ${response.body}");
-        return null;
+        throw Exception('Erreur lors de la récupération du profil');
       }
     } catch (e) {
-      print("Erreur de connexion à l'API : $e");
-      return null;
+      throw Exception('Erreur de connexion à l\'API : $e');
     }
   }
+
+  Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/ajouter/${profil.utilisateur.id}'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(profil.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      return ProfilDeSante.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erreur lors de la création du profil');
+    }
+  }
+
+  Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/modifier/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(profil.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      return ProfilDeSante.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erreur lors de la mise à jour du profil');
+    }
+  }
+
+  Future<void> supprimerProfil(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
+
+    await http.delete(
+      Uri.parse('$baseUrl/supprimer/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+  }
+
 }

@@ -1,13 +1,12 @@
-
 class Allergie {
   final int id;
   final String nom;
-  final String description;
+  final String? description;
 
   Allergie({
     required this.id,
     required this.nom,
-    required this.description,
+    this.description,
   });
 
   factory Allergie.fromJson(Map<String, dynamic> json) {
@@ -16,5 +15,13 @@ class Allergie {
       nom: json['nom'],
       description: json['description'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nom': nom,
+      'description': description,
+    };
   }
 }

@@ -48,5 +48,29 @@ class AuthService extends ChangeNotifier{
     await prefs.remove('jwt_token');
   }
 
+  Future<Map<String, dynamic>?> getCurrentUser() async {
+    final token = await getToken();
+    if (token == null) return null;
+
+    // Décoder le token JWT pour obtenir les données de l'utilisateur
+    final payload = _decodeJwt(token);
+    return payload;
+  }
+
+  Map<String, dynamic>? _decodeJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      return null; // Token mal formé
+    }
+
+    // Décoder la partie payload du token
+    final payload = parts[1];
+    final normalizedPayload = base64Url.normalize(payload);
+    final decodedBytes = base64Url.decode(normalizedPayload);
+    final decodedString = utf8.decode(decodedBytes);
+    return jsonDecode(decodedString);
+  }
+
+  
 
 }
