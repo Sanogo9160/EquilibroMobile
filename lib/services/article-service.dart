@@ -5,14 +5,16 @@ import '../models/article.dart';
 
 class ArticleService {
   
-  Future<List<Article>> fetchArticles() async {
-    final response = await http.get(Uri.parse('${AppConfig.baseUrl}/articles'));
-    if (response.statusCode == 200) {
-      List<dynamic> jsonList = json.decode(response.body);
-      return jsonList.map((json) => Article.fromJson(json)).toList();
-    } else {
-      throw Exception('Erreur lors de la récupération des articles');
-    }
+  Future<List<Article>> getArticles() async {
+  final response = await http.get(Uri.parse('${AppConfig.baseUrl}/articles/liste'));
+  if (response.statusCode == 200) {
+    final jsonData = json.decode(response.body);
+    return (jsonData as List)
+        .map((e) => Article.fromJson(e))
+        .toList();
+  } else {
+    throw Exception('Failed to fetch articles');
   }
+}
 
 }

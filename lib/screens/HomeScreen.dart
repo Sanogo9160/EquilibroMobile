@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.logout),
             onPressed: () async {
               await _authService.logout();
-              Navigator.pushReplacementNamed(context, '/login'); 
+              Navigator.pushReplacementNamed(context, '/login');
             },
           ),
         ],
@@ -56,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
@@ -78,16 +79,20 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _createButton('Profil de Santé', Icons.person_add, onPressed: () {
-                    Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ProfilDeSanteScreen()),
-              );
-
+                  _createButton('Profil de Santé', Icons.person_add,
+                      onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ProfilDeSanteScreen()),
+                    );
                   }),
                   SizedBox(width: 16.0),
-                  _createButton('Plan de Repas', Icons.fastfood, onPressed: () {}),
+                  _createButton('Plan de Repas', Icons.fastfood,
+                      onPressed: () {}),
                   SizedBox(width: 16.0),
-                  _createButton('Consultation', Icons.local_hospital, onPressed: () {}),
+                  _createButton('Consultation', Icons.local_hospital,
+                      onPressed: () {}),
                 ],
               ),
             ),
@@ -148,7 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _createButton(String title, IconData icon, {required VoidCallback onPressed}) {
+  Widget _createButton(String title, IconData icon,
+      {required VoidCallback onPressed}) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(

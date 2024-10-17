@@ -41,7 +41,7 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
     String? token = prefs.getString('jwt_token');
 
     final response = await http.post(
-      Uri.parse('$baseUrl/ajouter/${profil.utilisateur.id}'),
+      Uri.parse('$baseUrl/ajouter'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -88,5 +88,6 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
       },
     );
   }
+
 
 }
