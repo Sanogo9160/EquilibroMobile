@@ -1,5 +1,11 @@
+import 'package:equilibromobile/screens/CommunauteScreen.dart';
+import 'package:equilibromobile/screens/ConsultationScreen.dart';
+import 'package:equilibromobile/screens/MenuScreen.dart';
 import 'package:equilibromobile/screens/NotificationSceen.dart';
+import 'package:equilibromobile/screens/PlanRepasScreen.dart';
 import 'package:equilibromobile/screens/ProfilSanteScreen.dart';
+import 'package:equilibromobile/screens/ProfileScreen.dart';
+import 'package:equilibromobile/screens/Vertus_screen.dart';
 import 'package:equilibromobile/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -9,11 +15,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isHydrationExpanded = false;
-  bool _isAppleExpanded = false;
   int _currentIndex = 0;
-
   final AuthService _authService = AuthService();
+
+  List<Widget> _screens = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      MainContentScreen(),
+      //Container(color: Colors.red), // Remplacez par votre écran de menu
+      //Container(color: Colors.green), // Remplacez par votre écran de vertus
+      //Container(color: Colors.blue), // Remplacez par votre écran de communauté
+      //Container(color: Colors.orange), // Remplacez par votre écran de profil
+      MenuScreen(),
+      Communautescreen(),
+      VertusScreen(),
+      ProfileScreen()
+
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,78 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Barre de recherche
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Recherche',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                  borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                  borderSide: BorderSide(color: Colors.grey[400]!, width: 2.0),
-                ),
-              ),
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16.0,
-              ),
-              cursorColor: Color(0xFF00796B),
-            ),
-            SizedBox(height: 16.0),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _createButton('Profil de Santé', Icons.person_add,
-                      onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ProfilDeSanteScreen()),
-                    );
-                  }),
-                  SizedBox(width: 16.0),
-                  _createButton('Plan de Repas', Icons.fastfood,
-                      onPressed: () {}),
-                  SizedBox(width: 16.0),
-                  _createButton('Consultation', Icons.local_hospital,
-                      onPressed: () {}),
-                ],
-              ),
-            ),
-            SizedBox(height: 16.0),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _createHydrationCard(),
-                    SizedBox(height: 16.0),
-                    _createAppleCard(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -130,15 +81,16 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.restaurant_menu, color: Color(0xFF00796B)),
             label: 'Menu',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_nature_outlined),
-            activeIcon: Icon(Icons.emoji_nature, color: Color(0xFF00796B)),
-            label: 'Vertus',
-          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.group_outlined),
             activeIcon: Icon(Icons.group, color: Color(0xFF00796B)),
             label: 'Communauté',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_nature_outlined),
+            activeIcon: Icon(Icons.emoji_nature, color: Color(0xFF00796B)),
+            label: 'Vertus',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
@@ -149,6 +101,106 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         selectedItemColor: Color(0xFF00796B),
         unselectedItemColor: Colors.black,
+      ),
+    );
+  }
+}
+
+class MainContentScreen extends StatefulWidget {
+  @override
+  _MainContentScreenState createState() => _MainContentScreenState();
+}
+
+class _MainContentScreenState extends State<MainContentScreen> {
+  bool _isHydrationExpanded = false;
+  bool _isAppleExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Barre de recherche
+          TextField(
+            decoration: InputDecoration(
+              hintText: 'Recherche',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                borderSide: BorderSide(color: Colors.grey[400]!, width: 2.0),
+              ),
+            ),
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16.0,
+            ),
+            cursorColor: Color(0xFF00796B),
+          ),
+          SizedBox(height: 16.0),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _createButton('Profil de Santé', Icons.person_add,
+                    onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProfilDeSanteScreen()),
+                  );
+                }),
+                SizedBox(width: 16.0),
+                _createButton('Plan de Repas', Icons.fastfood,
+                    onPressed: () {
+
+                       Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PlanRepasScreen()),
+                  );
+                    }),
+                SizedBox(width: 16.0),
+                _createButton('Consultation', Icons.local_hospital,
+                    onPressed: () {
+                       Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ConsultationScreen()),
+                  );
+
+                   }),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.0),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _createHydrationCard(),
+                  SizedBox(height: 16.0),
+                  _createAppleCard(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
