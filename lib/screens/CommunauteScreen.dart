@@ -1,63 +1,65 @@
-import 'package:equilibromobile/models/forum.dart';
+import 'dart:convert';
+import 'package:equilibromobile/config.dart';
 import 'package:equilibromobile/screens/forum_detail_screen.dart';
 import 'package:equilibromobile/services/ForumService.dart';
+
 import 'package:flutter/material.dart';
 
-
-class Communautescreen extends StatefulWidget {
+class CommunauteScreen extends StatefulWidget {
   @override
-  _CommunautescreenState createState() => _CommunautescreenState();
+  _CommunauteScreenState createState() => _CommunauteScreenState();
 }
 
-class _CommunautescreenState extends State<Communautescreen> {
-  late Future<List<Forum>> _forumsFuture;
+class _CommunauteScreenState extends State<CommunauteScreen> {
+  List<dynamic> _forums = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _forumsFuture = ForumService().obtenirTousForums();
+    _loadForums();
+  }
+
+  Future<void> _loadForums() async {
+    try {
+      final forumService = ForumService();
+      final fetchedForums = await forumService.getForums();
+      setState(() {
+        _forums = fetchedForums;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Erreur lors de la récupération des forums: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Communauté'),
-      ),
-      body: FutureBuilder<List<Forum>>(
-        future: _forumsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Aucun forum disponible.'));
-          }
-
-          final forums = snapshot.data!;
-          return ListView.builder(
-            itemCount: forums.length,
-            itemBuilder: (context, index) {
-              final forum = forums[index];
-              return Card(
-                child: ListTile(
-                  title: Text(forum.nom),
-                  subtitle: Text(forum.description),
+      appBar: AppBar(title: Text('Forums')),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: _forums.length,
+              itemBuilder: (context, index) {
+                final forum = _forums[index];
+                return ListTile(
+                  title: Text(forum['nom']),
+                  subtitle: Text(forum['description']),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ForumDetailScreen(forum: forum),
+                        builder: (context) => ForumDetailScreen(forumId: forum['id']),
                       ),
                     );
                   },
-                ),
-              );
-            },
-          );
-        },
-      ),
+                );
+              },
+            ),
     );
   }
 }

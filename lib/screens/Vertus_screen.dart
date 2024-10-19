@@ -53,7 +53,7 @@ class _VertusScreenState extends State<VertusScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          article.title,
+                          article.titre,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18.0,
@@ -61,7 +61,7 @@ class _VertusScreenState extends State<VertusScreen> {
                         ),
                         SizedBox(height: 8.0),
                         Text(
-                          article.content,
+                          article.contenu,
                           style: TextStyle(fontSize: 16.0),
                         ),
                         SizedBox(height: 8.0),

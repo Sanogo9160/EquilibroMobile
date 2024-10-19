@@ -1,129 +1,107 @@
-import 'package:equilibromobile/models/commentaire.dart';
-import 'package:equilibromobile/models/forum.dart';
+
+import 'dart:convert';
+import 'package:equilibromobile/config.dart';
 import 'package:equilibromobile/services/ForumService.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ForumDetailScreen extends StatefulWidget {
-  final Forum forum;
+  final int forumId;
 
-  ForumDetailScreen({required this.forum});
+  ForumDetailScreen({required this.forumId});
 
   @override
   _ForumDetailScreenState createState() => _ForumDetailScreenState();
 }
 
 class _ForumDetailScreenState extends State<ForumDetailScreen> {
-  late Future<List<Commentaire>> _commentairesFuture;
-  final TextEditingController _commentaireController = TextEditingController();
+  Map<String, dynamic>? _forum;
+  bool _isLoading = true;
+  String _newComment = '';
 
   @override
   void initState() {
     super.initState();
-    _commentairesFuture = ForumService().obtenirCommentairesParForum(widget.forum.id);
+    _loadForumDetails();
   }
 
-  @override
-  void dispose() {
-    _commentaireController.dispose();
-    super.dispose();
-  }
-
-  void _ajouterCommentaire() async {
-    final contenu = _commentaireController.text.trim();
-    if (contenu.isNotEmpty) {
-      try {
-        final nouveauCommentaire = Commentaire(
-          id: 0, // ID géré par le backend
-          contenu: contenu,
-          date: DateTime.now(),
-          forum: widget.forum,
-        );
-        await ForumService().creerCommentaire(nouveauCommentaire);
-        _commentaireController.clear();
-        setState(() {
-          _commentairesFuture = ForumService().obtenirCommentairesParForum(widget.forum.id);
-        });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de l\'ajout du commentaire : $e')),
-        );
-      }
+  Future<void> _loadForumDetails() async {
+    try {
+      final forumService = ForumService();
+      final forumDetails = await forumService.getForumDetails(widget.forumId);
+      setState(() {
+        _forum = forumDetails;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Erreur lors de la récupération des détails du forum: $e');
     }
+  }
+
+  Future<void> _addComment() async {
+    final forumService = ForumService();
+    await forumService.addComment(widget.forumId, _newComment);
+    await _loadForumDetails();
+    setState(() {
+      _newComment = '';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.forum.nom),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<List<Commentaire>>(
-              future: _commentairesFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Erreur : ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('Aucun commentaire disponible.'));
-                }
-
-                final commentaires = snapshot.data!;
-                return ListView.builder(
-                  itemCount: commentaires.length,
-                  itemBuilder: (context, index) {
-                    final commentaire = commentaires[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            commentaire.contenu,
-                            style: TextStyle(fontSize: 16.0, color: Colors.black), // Couleur du texte
-                          ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            'Posté le ${DateFormat('dd/MM/yyyy HH:mm').format(commentaire.date)}',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 14.0),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
+      appBar: AppBar(title: const Text('Détails du forum')),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentaireController,
-                    style: TextStyle(color: Colors.black), // Couleur du texte dans le TextField
-                    decoration: InputDecoration(
-                      hintText: 'Ajouter un commentaire',
-                      hintStyle: TextStyle(color: Colors.grey), // Couleur de l'indice
-                      border: OutlineInputBorder(),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_forum?['nom'] ?? '', style: const TextStyle(fontSize: 24)),
+                      const SizedBox(height: 10),
+                      Text(_forum?['description'] ?? ''),
+                    ],
                   ),
                 ),
-                SizedBox(width: 16.0),
-                ElevatedButton(
-                  onPressed: _ajouterCommentaire,
-                  child: Text('Publier'),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _forum?['commentaires']?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      final comment = _forum?['commentaires'][index];
+                      return ListTile(
+                        title: Text(comment['contenu']),
+                        subtitle: Text('Par ${comment['auteur']['email']}'),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _newComment = value;
+                            });
+                          },
+                          style: const TextStyle(color: Colors.black),
+                          decoration: const InputDecoration(hintText: 'Ajouter un commentaire'),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.send),
+                        onPressed: _newComment.isEmpty ? null : _addComment,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

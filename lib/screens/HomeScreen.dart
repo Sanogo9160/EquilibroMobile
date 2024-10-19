@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //Container(color: Colors.blue), // Remplacez par votre écran de communauté
       //Container(color: Colors.orange), // Remplacez par votre écran de profil
       MenuScreen(),
-      Communautescreen(),
+      CommunauteScreen(),
       VertusScreen(),
       ProfileScreen()
 
@@ -81,8 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.restaurant_menu, color: Color(0xFF00796B)),
             label: 'Menu',
           ),
-
-          BottomNavigationBarItem(
+           BottomNavigationBarItem(
             icon: Icon(Icons.group_outlined),
             activeIcon: Icon(Icons.group, color: Color(0xFF00796B)),
             label: 'Communauté',
@@ -92,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.emoji_nature, color: Color(0xFF00796B)),
             label: 'Vertus',
           ),
+         
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person, color: Color(0xFF00796B)),

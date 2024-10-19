@@ -1,69 +1,116 @@
 import 'dart:convert';
 import 'package:equilibromobile/config.dart';
-import 'package:equilibromobile/models/commentaire.dart';
-import 'package:equilibromobile/models/forum.dart';
-import 'package:equilibromobile/services/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ForumService {
-  final String baseUrl = AppConfig.baseUrl;
+  final String _baseUrl = AppConfig.baseUrl;
 
-  Future<List<Forum>> obtenirTousForums() async {
-    final token = await AuthService().getToken(); // Récupérer le token
+  // Récupération de la liste des forums
+  Future<List<dynamic>> getForums() async {
+    final url = Uri.parse('$_baseUrl/forums/obtenir');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception('Token non trouvé. L\'utilisateur doit être authentifié.');
+    }
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(utf8.decode(response.bodyBytes));
+      } else {
+        throw Exception('Erreur lors de la récupération des forums: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Erreur lors de la récupération des forums: $e');
+      rethrow;
+    }
+  }
+
+  // Récupération des détails d'un forum
+  Future<Map<String, dynamic>> getForumDetails(int forumId) async {
+    final url = Uri.parse('$_baseUrl/forums/$forumId');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception('Token non trouvé. L\'utilisateur doit être authentifié.');
+    }
+
     final response = await http.get(
-      Uri.parse('$baseUrl/forums/liste'),
+      url,
       headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json; charset=utf-8", // Spécifier l'encodage UTF-8
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(utf8.decode(response.bodyBytes)); // Décoder les données en UTF-8
-      return jsonResponse.map((forum) => Forum.fromJson(forum)).toList();
+      return jsonDecode(utf8.decode(response.bodyBytes));
     } else {
-      throw Exception('Échec de chargement des forums');
+      throw Exception('Erreur lors de la récupération des détails du forum: ${response.statusCode} - ${response.body}');
     }
   }
 
-  Future<List<Commentaire>> obtenirCommentairesParForum(int forumId) async {
-    final token = await AuthService().getToken(); // Récupérer le token
-    final response = await http.get(
-      Uri.parse('$baseUrl/commentaires/$forumId'),
-      headers: {
-        "Authorization": "Bearer $token", // Ajout du token dans l'en-tête
-        "Content-Type": "application/json; charset=utf-8", // Spécifier l'encodage UTF-8
-      },
-    );
+  // Création d'un forum
+  Future<bool> createForum(String nom, String description) async {
+    final url = Uri.parse('$_baseUrl/forums/creer');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
 
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(utf8.decode(response.bodyBytes)); // Décoder les données en UTF-8
-      return jsonResponse.map((commentaire) => Commentaire.fromJson(commentaire)).toList();
-    } else {
-      throw Exception('Échec de chargement des commentaires');
+    if (token == null) {
+      throw Exception('Token non trouvé. L\'utilisateur doit être authentifié.');
     }
-  }
 
-  Future<Commentaire> creerCommentaire(Commentaire commentaire) async {
-    final token = await AuthService().getToken(); // Récupérer le token
+    final body = jsonEncode({
+      'nom': nom,
+      'description': description,
+    });
+
     final response = await http.post(
-      Uri.parse('$baseUrl/commentaires/ajouter'),
+      url,
       headers: {
-        "Authorization": "Bearer $token", 
-        "Content-Type": "application/json; charset=utf-8", //  l'encodage UTF-8
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
       },
-      body: utf8.encode(json.encode({ 
-        'contenu': commentaire.contenu,
-        'date': commentaire.date.toIso8601String(),
-        'forum': {'id': commentaire.forum.id}
-      })),
+      body: body,
     );
 
-    if (response.statusCode == 201) {
-      return Commentaire.fromJson(json.decode(utf8.decode(response.bodyBytes))); 
-    } else {
-      throw Exception('Échec de création du commentaire');
+    return response.statusCode == 200;
+  }
+
+  // Ajout d'un commentaire à un forum
+  Future<bool> addComment(int forumId, String contenu) async {
+    final url = Uri.parse('$_baseUrl/forums/$forumId/commentaires');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception('Token non trouvé. L\'utilisateur doit être authentifié.');
     }
+
+    final body = jsonEncode({
+      'contenu': contenu,
+    });
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    return response.statusCode == 200;
   }
 }
