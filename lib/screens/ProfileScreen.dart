@@ -1,10 +1,143 @@
 import 'package:flutter/material.dart';
+import 'package:equilibromobile/services/auth_service.dart';
+import 'package:equilibromobile/models/utilisateur.dart';
 
 class ProfileScreen extends StatelessWidget {
+  final AuthService _authService = AuthService();
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Page Profile'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profil'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: FutureBuilder<Utilisateur?>(
+        future: _authService.getCurrentUser(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('Erreur lors du chargement du profil'),
+            );
+          }
+
+          final utilisateur = snapshot.data;
+          if (utilisateur == null) {
+            return const Center(
+              child: Text('Aucun utilisateur trouvé'),
+            );
+          }
+
+          return SingleChildScrollView( // Utilisation de SingleChildScrollView
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[300],
+                      child: const Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Center(
+                    child: Text(
+                      utilisateur.nom,
+                      style: const TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF00796B),
+                      ),
+                    ),
+                  ),
+                  const Divider(thickness: 1, height: 32.0),
+                  _buildProfileField('Email', utilisateur.email),
+                  _buildProfileField('Téléphone', utilisateur.telephone ?? 'Non défini'),
+                  _buildProfileField('Poids', '${utilisateur.poids ?? 'Non défini'} kg'),
+                  _buildProfileField('Taille', '${utilisateur.taille ?? 'Non défini'} cm'),
+                  _buildProfileField('Âge', '${utilisateur.age ?? 'Non défini'} ans'),
+                  _buildProfileField('Sexe', utilisateur.sexe ?? 'Non défini'),
+                  const SizedBox(height: 16.0), // Espacement
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          // Ajouter la logique de modification du profil ici
+                        },
+                        icon: const Icon(Icons.edit),
+                        label: const Text(
+                          'Modifier',
+                          style: TextStyle(color: Colors.white), 
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00796B),
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          await _authService.logout();
+                          Navigator.pushReplacementNamed(context, '/login');
+                        },
+                        icon: const Icon(
+                          Icons.exit_to_app,
+                          color: Colors.red,
+                        ),
+                        label: const Text(
+                          'Quitter',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfileField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16.0),
+          ),
+        ],
+      ),
     );
   }
 }
