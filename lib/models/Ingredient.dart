@@ -1,22 +1,18 @@
+
 class Ingredient {
-  final String name; // Nom de l'ingrédient
-  final String quantity; // Quantité de l'ingrédient
+  final String name;
+  final String quantity;
 
-  Ingredient({required this.name, required this.quantity});
+  Ingredient({
+    required this.name,
+    required this.quantity,
+  });
 
-  // Factory pour créer un objet Ingredient à partir d'un JSON
+  // Factory pour créer un objet Ingredient à partir de JSON
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
-      name: json['name'],
-      quantity: json['quantity'],
+      name: json['name'] ?? 'Inconnu', // Valeur par défaut si null
+      quantity: json['quantity'] ?? '0', // Valeur par défaut si null
     );
-  }
-
-  // Méthode pour convertir un objet Ingredient en JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'quantity': quantity,
-    };
   }
 }

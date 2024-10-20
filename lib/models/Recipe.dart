@@ -1,13 +1,11 @@
-
-
 import 'package:equilibromobile/models/Ingredient.dart';
 
 class Recipe {
-  final String label; // Nom de la recette
-  final String image; // URL de l'image
-  final String url;   // URL de la recette
-  final List<Ingredient> ingredients; // Liste des ingrédients
-  final int cookingTime; // Temps de cuisson en minutes
+  final String label;
+  final String image;
+  final String url;
+  final List<Ingredient> ingredients;
+  final int cookingTime;
 
   Recipe({
     required this.label,
@@ -17,28 +15,19 @@ class Recipe {
     required this.cookingTime,
   });
 
-  // Factory pour créer un objet Recipe à partir d'un JSON
+  // Factory pour créer un objet Recipe à partir de JSON
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    var ingredientList = json['ingredients'] as List;
-    List<Ingredient> ingredients = ingredientList.map((i) => Ingredient.fromJson(i)).toList();
+    var ingredientList = json['ingredients'] as List?; // Notez le '?' pour rendre cela nullable
+    List<Ingredient> ingredients = ingredientList != null
+        ? ingredientList.map((i) => Ingredient.fromJson(i)).toList()
+        : []; // Utiliser une liste vide si null
 
     return Recipe(
-      label: json['label'],
-      image: json['image'],
-      url: json['url'],
+      label: json['label'] ?? 'Inconnu', // Valeur par défaut si null
+      image: json['image'] ?? '', // Valeur par défaut si null
+      url: json['url'] ?? '', // Valeur par défaut si null
       ingredients: ingredients,
-      cookingTime: json['cookingTime'],
+      cookingTime: json['cookingTime'] ?? 0, // Valeur par défaut si null
     );
-  }
-
-  // Méthode pour convertir un objet Recipe en JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'label': label,
-      'image': image,
-      'url': url,
-      'ingredients': ingredients.map((i) => i.toJson()).toList(),
-      'cookingTime': cookingTime,
-    };
   }
 }

@@ -1,8 +1,7 @@
-import 'package:equilibromobile/models/Recipe.dart';
+import 'package:equilibromobile/models/recipe.dart';
 import 'package:equilibromobile/screens/RecipeDetailScreen.dart';
 import 'package:equilibromobile/services/recette_service.dart';
 import 'package:flutter/material.dart';
-
 
 class MenuScreen extends StatefulWidget {
   @override
@@ -11,11 +10,12 @@ class MenuScreen extends StatefulWidget {
 
 class _MenuScreenState extends State<MenuScreen> {
   late Future<List<Recipe>> futureRecipes;
+  final recetteService = RecetteService();
 
   @override
   void initState() {
     super.initState();
-    futureRecipes = RecetteService().fetchRecipes(); // Appel au service pour récupérer toutes les recettes
+    futureRecipes = recetteService.fetchRecipes("chicken"); // Appel au service pour récupérer les recettes
   }
 
   @override
@@ -31,22 +31,25 @@ class _MenuScreenState extends State<MenuScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator(); // Indicateur de chargement
             } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}'); // Affichage de l'erreur
+              return Text('Erreur: ${snapshot.error}'); // Gestion des erreurs
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Text('No recipes found.'); // Pas de recettes
+              return Text('Aucune recette trouvée.'); // Si aucune recette
             }
 
-            // Affichage des recettes
             List<Recipe> recipes = snapshot.data!;
             return ListView.builder(
               itemCount: recipes.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(recipes[index].label),
-                  subtitle: Text('Cooking time: ${recipes[index].cookingTime} min'),
-                  leading: Image.network(recipes[index].image),
+                  subtitle: Text('Temps de cuisson: ${recipes[index].cookingTime} min'),
+                  leading: Image.network(
+                    recipes[index].image,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.broken_image); // Gestion de l'erreur d'image
+                    },
+                  ),
                   onTap: () {
-                    // Action à réaliser lors du clic sur une recette
                     Navigator.push(
                       context,
                       MaterialPageRoute(
