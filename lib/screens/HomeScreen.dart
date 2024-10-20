@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:equilibromobile/screens/CommunauteScreen.dart';
 import 'package:equilibromobile/screens/ConsultationScreen.dart';
 import 'package:equilibromobile/screens/MenuScreen.dart';
@@ -7,7 +8,6 @@ import 'package:equilibromobile/screens/ProfilSanteScreen.dart';
 import 'package:equilibromobile/screens/ProfileScreen.dart';
 import 'package:equilibromobile/screens/Vertus_screen.dart';
 import 'package:equilibromobile/services/auth_service.dart';
-import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -25,43 +25,40 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _screens = [
       MainContentScreen(),
-      //Container(color: Colors.red), // Remplacez par votre écran de menu
-      //Container(color: Colors.green), // Remplacez par votre écran de vertus
-      //Container(color: Colors.blue), // Remplacez par votre écran de communauté
-      //Container(color: Colors.orange), // Remplacez par votre écran de profil
       MenuScreen(),
       CommunauteScreen(),
       VertusScreen(),
-      ProfileScreen()
-
+      ProfileScreen(),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Accueil'),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await _authService.logout();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-          ),
-        ],
-      ),
+      appBar: _currentIndex == 0
+          ? AppBar(
+              title: Text('Accueil'),
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.notifications),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NotificationsScreen()),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: () async {
+                    await _authService.logout();
+                    Navigator.pushReplacementNamed(context, '/login');
+                  },
+                ),
+              ],
+            )
+          : null, // Pas d'AppBar pour d'autres écrans
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -81,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.restaurant_menu, color: Color(0xFF00796B)),
             label: 'Menu',
           ),
-           BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.group_outlined),
             activeIcon: Icon(Icons.group, color: Color(0xFF00796B)),
             label: 'Communauté',
@@ -91,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.emoji_nature, color: Color(0xFF00796B)),
             label: 'Vertus',
           ),
-         
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person, color: Color(0xFF00796B)),
@@ -156,34 +152,26 @@ class _MainContentScreenState extends State<MainContentScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _createButton('Profil de Santé', Icons.person_add,
-                    onPressed: () {
+                _createButton('Profil de Santé', Icons.person_add, onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => ProfilDeSanteScreen()),
+                    MaterialPageRoute(builder: (context) => ProfilDeSanteScreen()),
                   );
                 }),
                 SizedBox(width: 16.0),
-                _createButton('Plan de Repas', Icons.fastfood,
-                    onPressed: () {
-
-                       Navigator.push(
+                _createButton('Plan de Repas', Icons.fastfood, onPressed: () {
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => PlanRepasScreen()),
+                    MaterialPageRoute(builder: (context) => PlanRepasScreen()),
                   );
-                    }),
+                }),
                 SizedBox(width: 16.0),
-                _createButton('Consultation', Icons.local_hospital,
-                    onPressed: () {
-                       Navigator.push(
+                _createButton('Consultation', Icons.local_hospital, onPressed: () {
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => ConsultationScreen()),
+                    MaterialPageRoute(builder: (context) => ConsultationScreen()),
                   );
-
-                   }),
+                }),
               ],
             ),
           ),
@@ -205,12 +193,11 @@ class _MainContentScreenState extends State<MainContentScreen> {
     );
   }
 
-  Widget _createButton(String title, IconData icon,
-      {required VoidCallback onPressed}) {
+  Widget _createButton(String title, IconData icon, {required VoidCallback onPressed}) {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        minimumSize: Size(120, 60), // Hauteur et largeur ajustées
+        minimumSize: Size(120, 60),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -222,7 +209,7 @@ class _MainContentScreenState extends State<MainContentScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: Colors.white),
-          SizedBox(width: 8.0), // Espacement entre l'icône et le texte
+          SizedBox(width: 8.0),
           Text(title, style: TextStyle(color: Colors.white)),
         ],
       ),
@@ -264,8 +251,7 @@ class _MainContentScreenState extends State<MainContentScreen> {
                         SizedBox(height: 8.0),
                         Text(
                           'L\'hydratation est essentielle pour maintenir une santé optimale. '
-                          'Elle aide à réguler la température corporelle, à lubrifier les articulations et à transporter les nutriments. '
-                          'De plus, boire de l\'eau avant, pendant et après une activité physique peut améliorer les performances et favoriser la récupération.',
+                          'Elle aide à réguler la température corporelle, à lubrifier les articulations et à transporter les nutriments.',
                           style: TextStyle(fontSize: 14.0),
                         ),
                       ],
@@ -344,7 +330,7 @@ class _MainContentScreenState extends State<MainContentScreen> {
                         SizedBox(height: 8.0),
                         Text(
                           'Elle aide à la digestion, renforce le système immunitaire, '
-                          'et peut contribuer à réduire le cholestérol. Une pomme par jour peut améliorer votre santé cardiaque.',
+                          'et peut contribuer à réduire le cholestérol.',
                           style: TextStyle(fontSize: 14.0),
                         ),
                       ],

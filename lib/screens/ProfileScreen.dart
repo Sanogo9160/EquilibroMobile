@@ -37,7 +37,7 @@ class ProfileScreen extends StatelessWidget {
             );
           }
 
-          return SingleChildScrollView( // Utilisation de SingleChildScrollView
+          return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -80,7 +80,7 @@ class ProfileScreen extends StatelessWidget {
                         onPressed: () {
                           // Ajouter la logique de modification du profil ici
                         },
-                        icon: const Icon(Icons.edit),
+                        icon: const Icon(Icons.edit, color: Colors.white), // Icône blanche
                         label: const Text(
                           'Modifier',
                           style: TextStyle(color: Colors.white), 
@@ -99,7 +99,7 @@ class ProfileScreen extends StatelessWidget {
                           color: Colors.red,
                         ),
                         label: const Text(
-                          'Quitter',
+                          'Se Deconnecter',
                           style: TextStyle(color: Colors.red),
                         ),
                         style: ElevatedButton.styleFrom(
