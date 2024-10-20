@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+
 import 'package:equilibromobile/models/recipe.dart';
+import 'package:flutter/material.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
@@ -19,48 +21,57 @@ class RecipeDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Affichage de l'image de la recette
-              Image.network(
-                recipe.image,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(Icons.broken_image, size: 100);
-                },
-              ),
+              // Image de la recette
+              recipe.image.isNotEmpty
+                  ? Image.network(
+                      recipe.image,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.broken_image, size: 100);
+                      },
+                    )
+                  : Icon(Icons.no_photography, size: 100),
               SizedBox(height: 16.0),
 
-              // Titre de la section Ingrédients
+              // Ingrédients
               Text('Ingrédients:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               SizedBox(height: 8.0),
-
-              // Liste des ingrédients
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: recipe.ingredients.map((ingredient) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text('${ingredient.quantity} ${ingredient.name}'),
+                    child: Text(ingredient),
                   );
                 }).toList(),
               ),
-
               SizedBox(height: 16.0),
 
               // Temps de cuisson
               Text('Temps de cuisson: ${recipe.cookingTime} minutes', style: TextStyle(fontWeight: FontWeight.bold)),
-
               SizedBox(height: 16.0),
 
-              // URL de la recette
-              Text('URL de la recette:', style: TextStyle(fontWeight: FontWeight.bold)),
+              // Apports nutritionnels
+              if (recipe.nutritionalInfo != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Apports nutritionnels:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    ...recipe.nutritionalInfo!.entries.map((entry) {
+                      final info = entry.value;
+                      return Text('${entry.key}: ${info.quantity} ${info.unit}');
+                    }).toList(),
+                  ],
+                ),
+              SizedBox(height: 16.0),
+
+              // Lien vers la recette complète
               GestureDetector(
-                onTap: () {
-                  _launchURL(recipe.url);
-                },
+                onTap: () => _launchURL(recipe.url),
                 child: Text(
-                  recipe.url,
+                  'Voir la recette complète',
                   style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
                 ),
               ),
@@ -71,7 +82,7 @@ class RecipeDetailScreen extends StatelessWidget {
     );
   }
 
-  // Méthode pour ouvrir une URL dans le navigateur
+  // Fonction pour ouvrir l'URL
   void _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);

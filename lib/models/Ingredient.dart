@@ -11,8 +11,8 @@ class Ingredient {
   // Factory pour créer un objet Ingredient à partir de JSON
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
-      name: json['name'] ?? 'Inconnu', // Valeur par défaut si null
-      quantity: json['quantity'] ?? '0', // Valeur par défaut si null
+      name: json['name'] ?? 'Ingrédient inconnu', // Valeur par défaut si le nom est absent
+      quantity: json['quantity'] ?? 'Quantité inconnue', // Valeur par défaut
     );
   }
 }

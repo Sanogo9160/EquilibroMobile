@@ -6,17 +6,22 @@ import 'package:http/http.dart' as http;
 
 class RecetteService {
  
-  final String apiUrl = '${AppConfig.baseUrl}/recipes'; // URL de base de l'API backend
-
-  Future<List<Recipe>> fetchRecipes(String query) async {
-    final response = await http.get(Uri.parse('$apiUrl?query=$query'));
+ final String apiUrl = '${AppConfig.baseUrl}/recipes'; // URL de base de l'API backend
+Future<Map<String, List<Recipe>>> fetchRecipes() async {
+    final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
-      List<dynamic> jsonResponse = jsonDecode(response.body);
-      return jsonResponse.map((data) => Recipe.fromJson(data)).toList();
+      Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return jsonResponse.map((key, value) {
+        List<Recipe> recipes = List<Recipe>.from(
+          value.map((data) => Recipe.fromJson(data)),
+        );
+        return MapEntry(key, recipes);
+      });
     } else {
       throw Exception('Erreur lors du chargement des recettes');
     }
   }
-  
+
+
 }

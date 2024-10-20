@@ -1,33 +1,46 @@
-import 'package:equilibromobile/models/Ingredient.dart';
-
 class Recipe {
   final String label;
   final String image;
   final String url;
-  final List<Ingredient> ingredients;
   final int cookingTime;
+  final List<String> ingredients;
+  final Map<String, NutritionalInfo>? nutritionalInfo;
+  final String category;
 
   Recipe({
     required this.label,
     required this.image,
     required this.url,
-    required this.ingredients,
     required this.cookingTime,
+    required this.ingredients,
+    required this.category,
+    this.nutritionalInfo,
   });
 
-  // Factory pour créer un objet Recipe à partir de JSON
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    var ingredientList = json['ingredients'] as List?; // Notez le '?' pour rendre cela nullable
-    List<Ingredient> ingredients = ingredientList != null
-        ? ingredientList.map((i) => Ingredient.fromJson(i)).toList()
-        : []; // Utiliser une liste vide si null
-
     return Recipe(
-      label: json['label'] ?? 'Inconnu', // Valeur par défaut si null
-      image: json['image'] ?? '', // Valeur par défaut si null
-      url: json['url'] ?? '', // Valeur par défaut si null
-      ingredients: ingredients,
-      cookingTime: json['cookingTime'] ?? 0, // Valeur par défaut si null
+      label: json['label'] ?? 'Recette sans nom',
+      image: json['image'] ?? '',
+      url: json['url'] ?? '',
+      cookingTime: json['cookingTime'] ?? 0,
+      ingredients: List<String>.from(json['ingredients'] ?? []),
+      category: json['category'] ?? 'carnivore',
+      nutritionalInfo: (json['nutritionalInfo'] as Map<String, dynamic>?)
+          ?.map((key, value) => MapEntry(key, NutritionalInfo.fromJson(value))),
+    );
+  }
+}
+
+class NutritionalInfo {
+  final double quantity;
+  final String unit;
+
+  NutritionalInfo({required this.quantity, required this.unit});
+
+  factory NutritionalInfo.fromJson(Map<String, dynamic> json) {
+    return NutritionalInfo(
+      quantity: (json['quantity'] ?? 0).toDouble(),
+      unit: json['unit'] ?? '',
     );
   }
 }

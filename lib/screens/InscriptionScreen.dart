@@ -21,12 +21,12 @@ class _InscriptionPageState extends State<InscriptionPage> {
   final TextEditingController _poidsController = TextEditingController();
   final TextEditingController _tailleController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
-  
-  String _sexe = 'Homme'; // Valeur par défaut pour le sexe
+
+  String? _sexe; // Valeur du sexe sélectionné
 
   // Fonction pour gérer l'inscription
   Future<void> _inscrireUtilisateur() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && _sexe != null) {
       final String nom = _nomController.text;
       final String email = _emailController.text;
       final String telephone = _telephoneController.text;
@@ -74,18 +74,192 @@ class _InscriptionPageState extends State<InscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Inscription'),
-      ),
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 32.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // ... vos champs de formulaire ici ...
-                SizedBox(height: 20),
+                Text(
+                  'Création de nouveau compte',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00796B),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Image.asset(
+                  'assets/images/compte.png',
+                  height: 100,
+                  width: 100, 
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _nomController,
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: 'Nom complet',
+                    labelStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Veuillez entrer votre nom';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _emailController,
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Veuillez entrer votre email';
+                    }
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      return 'Veuillez entrer un email valide';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _telephoneController,
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: 'Numéro de téléphone',
+                    labelStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Veuillez entrer votre numéro de téléphone';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _motDePasseController,
+                  obscureText: true,
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: 'Mot de passe',
+                    labelStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Veuillez entrer un mot de passe';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _poidsController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        style: TextStyle(color: Colors.black),
+                        decoration: InputDecoration(
+                          labelText: 'Poids (en kg)',
+                          labelStyle: TextStyle(color: Colors.black),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Veuillez entrer votre poids';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 16.0),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _tailleController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        style: TextStyle(color: Colors.black),
+                        decoration: InputDecoration(
+                          labelText: 'Taille (en cm)',
+                          labelStyle: TextStyle(color: Colors.black),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Veuillez entrer votre taille';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _ageController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: 'Âge',
+                    labelStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Veuillez entrer votre âge';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+                DropdownButtonFormField<String>(
+                  value: _sexe,
+                  hint: Text('Sélectionnez votre sexe'),
+                  items: <String>['Homme', 'Femme']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _sexe = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Veuillez sélectionner votre sexe';
+                    }
+                    return null;
+                  },
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: 'Sexe',
+                    labelStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: _inscrireUtilisateur,
                   child: Text('S\'inscrire', style: TextStyle(color: Colors.white)),
@@ -96,6 +270,13 @@ class _InscriptionPageState extends State<InscriptionPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                ),
+                SizedBox(height: 16.0),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/login');
+                  },
+                  child: Text('Vous avez déjà un compte ? Connectez-vous'),
                 ),
               ],
             ),
