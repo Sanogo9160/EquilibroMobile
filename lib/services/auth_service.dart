@@ -61,6 +61,15 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  // Méthode pour obtenir l'identifiant utilisateur à partir du token
+  Future<int?> getUtilisateurId() async {
+    final token = await getToken();
+    if (token == null) return null;
+
+    final decodedToken = _decodeJwt(token);
+    return decodedToken?['id']; // Assurez-vous que 'id' est la clé correcte dans le payload du token
+  }
+
   Map<String, dynamic>? _decodeJwt(String token) {
     final parts = token.split('.');
     if (parts.length != 3) return null;
@@ -78,7 +87,7 @@ class AuthService extends ChangeNotifier {
     final token = await getToken();
     if (token == null) return false;
 
-    final url = Uri.parse('$_baseUrl/utilisateurs/update'); // URL de votre API
+    final url = Uri.parse('$_baseUrl/utilisateurs/update'); 
     try {
       final response = await http.put(
         url,

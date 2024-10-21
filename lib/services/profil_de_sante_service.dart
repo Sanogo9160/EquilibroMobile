@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:equilibromobile/models/profil_sante.dart';
+import 'package:equilibromobile/screens/PlanRepasScreen.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart'; 
@@ -35,26 +37,31 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
       throw Exception('Erreur de connexion à l\'API : $e');
     }
   }
+  
+  Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil, BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
 
-Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil) async {
-  final prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('jwt_token');
+    final response = await http.post(
+      Uri.parse('${AppConfig.baseUrl}/ajouter'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(profil.toJson()),
+    );
 
-  final response = await http.post(
-    Uri.parse('$baseUrl/ajouter'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-    body: jsonEncode(profil.toJson()),
-  );
-
-  if (response.statusCode == 201) {
-    return ProfilDeSante.fromJson(jsonDecode(response.body));
-  } else {
-    throw Exception('Erreur lors de la création du profil: ${response.body}');
+    if (response.statusCode == 201) {
+      // Profil créé avec succès, naviguer vers PlanRepasScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PlanRepasScreen()),
+      );
+      return ProfilDeSante.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erreur lors de la création du profil: ${response.body}');
+    }
   }
-}
 
 
   Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {

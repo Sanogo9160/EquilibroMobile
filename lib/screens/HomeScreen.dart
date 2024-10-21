@@ -1,3 +1,4 @@
+import 'package:equilibromobile/screens/DieteticienListScreen%20.dart';
 import 'package:flutter/material.dart';
 import 'package:equilibromobile/screens/CommunauteScreen.dart';
 import 'package:equilibromobile/screens/ConsultationScreen.dart';
@@ -169,7 +170,8 @@ class _MainContentScreenState extends State<MainContentScreen> {
                 _createButton('Consultation', Icons.local_hospital, onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ConsultationScreen()),
+                     MaterialPageRoute(builder: (context) => DieteticienListScreen())
+                    //MaterialPageRoute(builder: (context) => ConsultationScreen()),
                   );
                 }),
               ],

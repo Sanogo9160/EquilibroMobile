@@ -1,3 +1,4 @@
+import 'package:equilibromobile/screens/PlanRepasScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:equilibromobile/models/allergie.dart';
 import 'package:equilibromobile/models/maladie.dart';
@@ -34,7 +35,7 @@ class _CreerProfilScreenState extends State<CreerProfilScreen> {
       final List<ObjectifSante> objectifsList = _selectedObjectif != null
           ? [ObjectifSante(id: 1, nom: _selectedObjectif!)]
           : [];
-      final List<Allergie> allergiesList = _selectedAllergie != null
+      final List<Allergie> allergiesList = _selectedAllergie != null && _selectedAllergie != 'Aucune'
           ? [Allergie(id: 1, nom: _selectedAllergie!)]
           : [];
       final List<PreferenceAlimentaire> preferencesAlimentairesList = _selectedPreferenceAlimentaire != null
@@ -49,17 +50,25 @@ class _CreerProfilScreenState extends State<CreerProfilScreen> {
         utilisateur: Utilisateur(id: 1, nom: 'Utilisateur Test', email: '', motDePasse: ''),
       );
 
-      try {
-        await ProfilDeSanteService().ajouterProfil(profil);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profil créé avec succès!')),
-        );
-        Navigator.of(context).pop();
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la création du profil: $e')),
-        );
-      }
+try {
+  // Appel au service pour ajouter le profil avec le context
+  await ProfilDeSanteService().ajouterProfil(profil, context);
+
+  // Afficher un message de succès
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Profil créé avec succès!')),
+  );
+
+  // Redirection vers l'écran du plan de repas
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => PlanRepasScreen()),
+  );
+} catch (e) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Erreur lors de la création du profil: $e')),
+  );
+}
     }
   }
 
