@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart'; 
 import '../config.dart';
 import '../models/utilisateur.dart';
 
@@ -70,5 +71,38 @@ class AuthService extends ChangeNotifier {
     final decodedString = utf8.decode(decodedBytes);
 
     return jsonDecode(decodedString);
+  }
+
+  Future<bool> updateUserProfile(
+      String nom, String email, String? telephone, String? motDePasse) async {
+    final token = await getToken();
+    if (token == null) return false;
+
+    final url = Uri.parse('$_baseUrl/utilisateurs/update'); // URL de votre API
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'nom': nom,
+          'email': email,
+          'telephone': telephone,
+          'motDePasse': motDePasse,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('Erreur lors de la mise à jour du profil : ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Erreur lors de la mise à jour du profil : $e');
+      return false;
+    }
   }
 }

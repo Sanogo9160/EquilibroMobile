@@ -36,25 +36,26 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
     }
   }
 
-  Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('jwt_token');
+Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil) async {
+  final prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('jwt_token');
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/ajouter'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(profil.toJson()),
-    );
+  final response = await http.post(
+    Uri.parse('$baseUrl/ajouter'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode(profil.toJson()),
+  );
 
-    if (response.statusCode == 201) {
-      return ProfilDeSante.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Erreur lors de la création du profil');
-    }
+  if (response.statusCode == 201) {
+    return ProfilDeSante.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Erreur lors de la création du profil: ${response.body}');
   }
+}
+
 
   Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
     final prefs = await SharedPreferences.getInstance();

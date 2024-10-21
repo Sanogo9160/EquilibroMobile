@@ -10,7 +10,7 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
   void initState() {
     super.initState();
     // Redirige vers la page de connexion après 5 secondes
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacementNamed(context, '/login');
     });
   }

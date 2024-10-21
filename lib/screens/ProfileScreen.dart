@@ -1,3 +1,4 @@
+import 'package:equilibromobile/screens/EditProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:equilibromobile/services/auth_service.dart';
 import 'package:equilibromobile/models/utilisateur.dart';
@@ -77,18 +78,24 @@ class ProfileScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: () {
-                          // Ajouter la logique de modification du profil ici
-                        },
-                        icon: const Icon(Icons.edit, color: Colors.white), // Icône blanche
-                        label: const Text(
-                          'Modifier',
-                          style: TextStyle(color: Colors.white), 
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditProfileScreen(utilisateur: utilisateur),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          label: const Text(
+                            'Modifier',
+                            style: TextStyle(color: Colors.white), 
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00796B),
+                          ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00796B),
-                        ),
-                      ),
+                                              
                       ElevatedButton.icon(
                         onPressed: () async {
                           await _authService.logout();

@@ -60,6 +60,8 @@ class Utilisateur {
       'profilDeSante': profilDeSante?.toJson(),
     };
   }
+
+  copyWith({required String nom, required String email}) {}
 }
 
 // Exemple de classe Role
