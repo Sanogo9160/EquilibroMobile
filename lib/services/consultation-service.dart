@@ -7,7 +7,7 @@ class ConsultationService {
   final AuthService _authService = AuthService();
 
   // Réserver une consultation
-   Future<void> reserverConsultation(int utilisateurId, int dieteticienId, String date) async {
+  Future<void> reserverConsultation(int utilisateurId, int dieteticienId, String date) async {
     String? token = await _authService.getToken();
 
     final response = await http.post(
@@ -45,4 +45,5 @@ class ConsultationService {
     }
   }
 
+  
 }

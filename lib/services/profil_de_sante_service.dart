@@ -4,14 +4,12 @@ import 'package:equilibromobile/screens/PlanRepasScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config.dart'; 
+import '../config.dart';
 
 class ProfilDeSanteService {
+  static const String baseUrl = AppConfig.baseUrl + "/profils-de-sante";
 
-static const String baseUrl = AppConfig.baseUrl + "/profils-de-sante";
-
-
-Future<Map<String, dynamic>?> obtenirMonProfil() async {
+  Future<Map<String, dynamic>?> obtenirMonProfil() async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
 
@@ -37,36 +35,47 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
       throw Exception('Erreur de connexion à l\'API : $e');
     }
   }
-  
+
   Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil, BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
 
-    final response = await http.post(
-      Uri.parse('${AppConfig.baseUrl}/ajouter'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(profil.toJson()),
-    );
+    if (token == null) {
+      throw Exception("Utilisateur non authentifié.");
+    }
 
-    if (response.statusCode == 201) {
-      // Profil créé avec succès, naviguer vers PlanRepasScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => PlanRepasScreen()),
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/ajouter'), // URL corrigée
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(profil.toJson()),
       );
-      return ProfilDeSante.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Erreur lors de la création du profil: ${response.body}');
+
+      if (response.statusCode == 201) {
+        // Profil créé avec succès, naviguer vers PlanRepasScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PlanRepasScreen()),
+        );
+        return ProfilDeSante.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Erreur lors de la création du profil: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion à l\'API : $e');
     }
   }
 
-
-  Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
+Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception("Utilisateur non authentifié.");
+    }
 
     final response = await http.put(
       Uri.parse('$baseUrl/modifier/$id'),
@@ -74,19 +83,23 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(profil.toJson()),
+      body: jsonEncode(profil.toJson()), // Assurez-vous que toJson() est correct
     );
 
     if (response.statusCode == 200) {
       return ProfilDeSante.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Erreur lors de la mise à jour du profil');
+      throw Exception('Erreur lors de la mise à jour du profil: ${response.body}');
     }
-  }
+}
 
   Future<void> supprimerProfil(int id) async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception("Utilisateur non authentifié.");
+    }
 
     await http.delete(
       Uri.parse('$baseUrl/supprimer/$id'),
@@ -96,6 +109,6 @@ Future<Map<String, dynamic>?> obtenirMonProfil() async {
       },
     );
   }
+  }
 
 
-}

@@ -1,4 +1,4 @@
-import 'utilisateur.dart';
+import 'package:equilibromobile/models/utilisateur.dart';
 
 class Dieteticien extends Utilisateur {
   final String? specialite;
@@ -14,6 +14,7 @@ class Dieteticien extends Utilisateur {
     int? age,
     String? sexe,
     this.specialite,
+    String? imageUrl, 
   }) : super(
           id: id,
           nom: nom,
@@ -24,6 +25,7 @@ class Dieteticien extends Utilisateur {
           taille: taille,
           age: age,
           sexe: sexe,
+          imageUrl: imageUrl, 
         );
 
   factory Dieteticien.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class Dieteticien extends Utilisateur {
       age: json['age'],
       sexe: json['sexe'],
       specialite: json['specialite'],
+      imageUrl: json['imageUrl'], 
     );
   }
 

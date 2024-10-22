@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:equilibromobile/models/profil_sante.dart';
+import 'package:equilibromobile/models/role.dart';
+
 class Utilisateur {
   final int? id;
   final String nom;
@@ -11,6 +14,7 @@ class Utilisateur {
   final int? age;
   final String? sexe;
   final Role? role;
+  final String? imageUrl; 
   final ProfilDeSante? profilDeSante;
 
   Utilisateur({
@@ -24,6 +28,7 @@ class Utilisateur {
     this.age,
     this.sexe,
     this.role,
+    this.imageUrl,
     this.profilDeSante,
   });
 
@@ -41,6 +46,7 @@ class Utilisateur {
       sexe: json['sexe'],
       role: json['role'] != null ? Role.fromJson(json['role']) : null,
       profilDeSante: json['profilDeSante'] != null ? ProfilDeSante.fromJson(json['profilDeSante']) : null,
+       imageUrl: json['imageUrl'],
     );
   }
 
@@ -58,52 +64,10 @@ class Utilisateur {
       'sexe': sexe,
       'role': role?.toJson(),
       'profilDeSante': profilDeSante?.toJson(),
+      'imageUrl': imageUrl,
     };
   }
 
   copyWith({required String nom, required String email}) {}
 }
 
-// Exemple de classe Role
-class Role {
-  final int? id;
-  final String nom;
-
-  Role({this.id, required this.nom});
-
-  factory Role.fromJson(Map<String, dynamic> json) {
-    return Role(
-      id: json['id'],
-      nom: json['nom'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nom': nom,
-    };
-  }
-}
-
-// Exemple de classe ProfilDeSante
-class ProfilDeSante {
-  final int? id;
-  final String? details; // Ajoutez d'autres champs nécessaires
-
-  ProfilDeSante({this.id, this.details});
-
-  factory ProfilDeSante.fromJson(Map<String, dynamic> json) {
-    return ProfilDeSante(
-      id: json['id'],
-      details: json['details'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'details': details,
-    };
-  }
-}

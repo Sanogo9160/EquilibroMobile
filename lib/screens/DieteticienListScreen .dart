@@ -6,7 +6,6 @@ import 'package:equilibromobile/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-
 class DieteticienListScreen extends StatefulWidget {
   @override
   _DieteticienListScreenState createState() => _DieteticienListScreenState();
@@ -14,6 +13,10 @@ class DieteticienListScreen extends StatefulWidget {
 
 class _DieteticienListScreenState extends State<DieteticienListScreen> {
   List<Dieteticien> _dieteticiens = [];
+  List<Dieteticien> _filteredDieteticiens = [];
+  int _selectedIndex = 0;
+  TextEditingController _searchController = TextEditingController();
+  List<bool> _isLiked = [];
 
   @override
   void initState() {
@@ -23,7 +26,7 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
 
   Future<void> _fetchDieteticiens() async {
     final authService = AuthService();
-    String? token = await authService.getToken(); 
+    String? token = await authService.getToken();
 
     final response = await http.get(
       Uri.parse('${AppConfig.baseUrl}/dieteticiens/liste'),
@@ -37,10 +40,44 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
       final List<dynamic> data = json.decode(response.body);
       setState(() {
         _dieteticiens = data.map((json) => Dieteticien.fromJson(json)).toList();
+        _filteredDieteticiens = _dieteticiens;
+        _isLiked = List.generate(_dieteticiens.length, (_) => false);
       });
     } else {
       throw Exception('Erreur lors de la récupération des diététiciens');
     }
+  }
+
+  void _filterDieteticiens(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredDieteticiens = _dieteticiens;
+      });
+    } else {
+      setState(() {
+        _filteredDieteticiens = _dieteticiens.where((dieteticien) =>
+            dieteticien.nom.toLowerCase().contains(query.toLowerCase()) ||
+            (dieteticien.specialite ?? '').toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
+  void _selectButton(int index) {
+    setState(() {
+      _selectedIndex = index;
+      if (index == 1) {
+        _filteredDieteticiens = [];
+      } else {
+        _filterDieteticiens('');
+      }
+    });
+  }
+
+  void _toggleLike(int index) {
+    setState(() {
+      _isLiked[index] = !_isLiked[index];
+    });
   }
 
   @override
@@ -49,28 +86,227 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
       appBar: AppBar(
         title: Text('Choisir un diététicien'),
       ),
-      body: _dieteticiens.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _dieteticiens.length,
-              itemBuilder: (context, index) {
-                final dieteticien = _dieteticiens[index];
-                return ListTile(
-                  title: Text(dieteticien.nom),
-                  subtitle: Text(dieteticien.specialite ?? 'Spécialité non renseignée'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReserverConsultationScreen(
-                          dieteticien: dieteticien,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _filterDieteticiens,
+              style: TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                hintText: 'Rechercher par nom ou spécialité',
+                hintStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                prefixIcon: Icon(Icons.search),
+              ),
             ),
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => _selectButton(0),
+                child: Text('Recommandé'),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  backgroundColor: _selectedIndex == 0 ? Color(0xFF00796B) : Color(0xFF00796B).withOpacity(0.5),
+                  foregroundColor: _selectedIndex == 0 ? Colors.white : Colors.black,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => _selectButton(1),
+                child: Text('Populaire'),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  backgroundColor: _selectedIndex == 1 ? Color(0xFF00796B) : Colors.grey[300],
+                  foregroundColor: _selectedIndex == 1 ? Colors.white : Colors.black,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Expanded(
+            child: _filteredDieteticiens.isEmpty
+                ? Center(
+                    child: _selectedIndex == 1
+                        ? Text('Aucun contenu disponible pour "Populaire"')
+                        : CircularProgressIndicator(),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredDieteticiens.length,
+                    itemBuilder: (context, index) {
+                      final dieteticien = _filteredDieteticiens[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReserverConsultationScreen(dieteticien: dieteticien),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(16.0),
+                                        bottomLeft: Radius.circular(16.0),
+                                      ),
+                                      image: dieteticien.imageUrl != null
+                                          ? DecorationImage(
+                                              image: NetworkImage(dieteticien.imageUrl!), // Récupération de l'image
+                                              fit: BoxFit.cover,
+                                            )
+                                          : DecorationImage(
+                                              image: AssetImage('assets/images/profil.png'),
+                                              fit: BoxFit.cover,
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              dieteticien.nom,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(
+                                                _isLiked[index] ? Icons.favorite : Icons.favorite_border,
+                                                color: Color(0xFF00796B),
+                                                size: 20,
+                                              ),
+                                              onPressed: () {
+                                                _toggleLike(index);
+                                              },
+                                            ),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber,
+                                                  size: 16,
+                                                ),
+                                                SizedBox(width: 4),
+                                                Text(
+                                                  '5.0',
+                                                  style: TextStyle(
+                                                    color: Colors.amber,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          dieteticien.specialite ?? 'Spécialité non renseignée',
+                                          style: TextStyle(
+                                            color: Colors.grey[700],
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                // Logique pour appeler le diététicien
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.phone, size: 16, color: Color(0xFF00796B)),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    dieteticien.telephone ?? 'Téléphone non renseigné',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(width: 16),
+                                            GestureDetector(
+                                              onTap: () {
+                                                // Logique pour envoyer un message
+                                              },
+                                              child: Icon(
+                                                Icons.message,
+                                                size: 16,
+                                                color: Color(0xFF00796B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 8),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ReserverConsultationScreen(dieteticien: dieteticien),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xFF00796B),
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                            ),
+                                            minimumSize: Size(double.infinity, 40),
+                                          ),
+                                          child: Text('Prendre rendez-vous'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

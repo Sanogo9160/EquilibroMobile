@@ -1,5 +1,6 @@
 import 'package:equilibromobile/models/profil_sante.dart';
 import 'package:equilibromobile/screens/CreerProfilScreen.dart';
+import 'package:equilibromobile/screens/ModifierProfilDeSanteScreen.dart';
 import 'package:equilibromobile/services/profil_de_sante_service.dart';
 import 'package:flutter/material.dart';
 
@@ -20,10 +21,7 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
 
   void _loadProfil() async {
     try {
-      // Fetch the profile using the service
       final profilData = await ProfilDeSanteService().obtenirMonProfil();
-      
-      // If there's profile data, update the state accordingly
       if (profilData != null) {
         final profil = ProfilDeSante.fromJson(profilData);
         setState(() {
@@ -31,13 +29,11 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
           _profilId = profil.id;
         });
       } else {
-        // If no profile data, set the Future to `null` (indicating no profile)
         setState(() {
           _profilFuture = Future.value(null);
         });
       }
     } catch (e) {
-      // Handle any errors by setting the Future to `null`
       print('Erreur lors du chargement du profil : $e');
       setState(() {
         _profilFuture = Future.value(null);
@@ -76,7 +72,6 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
   }
 
   void _creerProfil() {
-    // Navigate to the profile creation screen
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => CreerProfilScreen()),
@@ -84,11 +79,22 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
   }
 
   void _modifierProfil() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Cette fonctionnalité de modification n\'est pas encore disponible.'),
-      ),
-    );
+    _profilFuture.then((profil) {
+      if (profil != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ModifierProfilDeSanteScreen(profil: profil),
+          ),
+        ).then((_) {
+          _loadProfil();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Aucun profil à modifier.')),
+        );
+      }
+    });
   }
 
   @override
@@ -98,17 +104,13 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
       body: FutureBuilder<ProfilDeSante?>(
         future: _profilFuture,
         builder: (context, snapshot) {
-          // Handle the loading state
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          
-          // Handle the error state (when API call fails)
           if (snapshot.hasError) {
             return Center(child: Text('Erreur de chargement.'));
           }
 
-          // Check if no profile exists for the user
           final profil = snapshot.data;
           if (profil == null) {
             return Center(
@@ -126,7 +128,6 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
             );
           }
 
-          // If profile exists, display profile details
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -175,4 +176,3 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
     );
   }
 }
-
