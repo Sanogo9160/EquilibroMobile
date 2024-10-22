@@ -32,7 +32,7 @@ class _ReserverConsultationScreenState
   }
 
   // Fonction pour récupérer les disponibilités depuis l'API
-  Future<void> _fetchDisponibilites() async {
+Future<void> _fetchDisponibilites() async {
   final authService = AuthService();
   String? token = await authService.getToken();
 
@@ -46,19 +46,35 @@ class _ReserverConsultationScreenState
 
   if (response.statusCode == 200) {
     final disponibilites = json.decode(response.body) as List<dynamic>;
-
     Map<DateTime, List<Map<String, dynamic>>> events = {};
 
     for (var dispo in disponibilites) {
       DateTime dateDebut = DateTime.parse(dispo['dateDebut']);
-      
-      // Normaliser la date sans l'heure (important pour le calendrier)
-      DateTime dateNormalisee = DateTime(dateDebut.year, dateDebut.month, dateDebut.day);
+      DateTime dateFin = DateTime.parse(dispo['dateFin']);
 
-      events[dateNormalisee] = events[dateNormalisee] ?? [];
-      events[dateNormalisee]!.add(dispo);
+      // Normaliser les dates sans l'heure
+      DateTime dateDebutNormalisee = DateTime(dateDebut.year, dateDebut.month, dateDebut.day);
+      DateTime dateFinNormalisee = DateTime(dateFin.year, dateFin.month, dateFin.day);
+
+      // Ajouter un événement pour chaque jour dans l'intervalle entre dateDebut et dateFin
+      for (DateTime date = dateDebutNormalisee;
+          date.isBefore(dateFinNormalisee.add(Duration(days: 1))); // Inclure la date de fin
+          date = date.add(Duration(days: 1))) {
+        
+        // Initialiser la liste des événements pour cette date si elle n'existe pas
+        if (events[date] == null) {
+          events[date] = [];
+        }
+
+        // Ajout la disponibilité à chaque jour de l'intervalle
+        events[date]!.add({
+          'dateDebut': dispo['dateDebut'],
+          'dateFin': dispo['dateFin'],
+        });
+      }
     }
 
+    print('Événements: $events'); //  ligne pour déboguer
     setState(() {
       _events = events;
     });
@@ -68,6 +84,7 @@ class _ReserverConsultationScreenState
     );
   }
 }
+
 
 
   // Fonction pour réserver une consultation
@@ -107,30 +124,32 @@ class _ReserverConsultationScreenState
             firstDay: DateTime.now(),
             lastDay: DateTime(2100),
             calendarFormat: _calendarFormat,
-
             eventLoader: (day) {
             DateTime dateNormalisee = DateTime(day.year, day.month, day.day);
-            print("Chargement des événements pour : $dateNormalisee");
+            print('Checking events for: $dateNormalisee');
+            if (_events[dateNormalisee] != null) {
+              print('Events for this date: ${_events[dateNormalisee]}');
+            } else {
+              print('No events for this date.');
+            }
             return _events[dateNormalisee] ?? [];
           },
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
-                DateTime dateNormalisee = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+              DateTime dateNormalisee = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
 
-                if (_events[dateNormalisee] != null) {
-                  setState(() {
-                    _selectedDay = dateNormalisee;
-                    _focusedDay = focusedDay;
-                    _selectedEvents = _events[dateNormalisee] ?? [];
-                  });
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Aucune disponibilité pour ce jour')),
-                  );
-                }
-              },
+              setState(() {
+                _selectedDay = dateNormalisee;
+                _focusedDay = focusedDay;
+                _selectedEvents = _events[dateNormalisee] ?? [];
+              });
 
-            
+              if (_selectedEvents.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Aucune disponibilité pour ce jour')),
+                );
+              }
+            },
             calendarStyle: CalendarStyle(
               todayDecoration: BoxDecoration(
                 color: Colors.blueAccent,
