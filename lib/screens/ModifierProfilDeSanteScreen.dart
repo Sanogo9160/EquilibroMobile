@@ -40,7 +40,7 @@ class _ModifierProfilDeSanteScreenState extends State<ModifierProfilDeSanteScree
           id: widget.profil.id!,
           utilisateur: Utilisateur(
             id: widget.profil.utilisateur.id,
-            nom: widget.profil.utilisateur.nom, // Conserver le nom d'origine
+            nom: widget.profil.utilisateur.nom, 
             email: widget.profil.utilisateur.email,
             motDePasse: '', 
           ),
@@ -67,7 +67,7 @@ class _ModifierProfilDeSanteScreenState extends State<ModifierProfilDeSanteScree
         );
 
         await ProfilDeSanteService().mettreAJourProfil(widget.profil.id!, updatedProfil);
-        Navigator.pop(context); // Retourner à l'écran précédent
+        Navigator.pop(context); 
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur lors de la mise à jour : $e')));
       }
@@ -77,44 +77,99 @@ class _ModifierProfilDeSanteScreenState extends State<ModifierProfilDeSanteScree
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Modifier Profil de Santé')),
+      appBar: AppBar(title: Text('Modifier Profil de Santé', style: TextStyle(color: Colors.white))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
-              // Retirer le champ de nom
-              Text("Nom : ${widget.profil.utilisateur.nom}", style: TextStyle(fontSize: 18)),
-              SizedBox(height: 20), // Espacement
+              // Nom de l'utilisateur, en tant que texte simple
+              Text(
+                "Nom : ${widget.profil.utilisateur.nom}",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+              ),
+              SizedBox(height: 16), // Espacement pour plus d'aération
+
+              // Champ Maladies
               TextFormField(
                 initialValue: _maladies,
-                decoration: InputDecoration(labelText: 'Maladies', filled: true, fillColor: Colors.black12),
+                style: TextStyle(color: Colors.black), // Texte en noir
+                decoration: InputDecoration(
+                  labelText: 'Maladies',
+                  labelStyle: TextStyle(color: Colors.teal), // Label en blanc
+                  filled: true,
+                  fillColor: Colors.teal.shade50,  // Teinte subtile de teal pour le fond
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 validator: (value) => value!.isEmpty ? 'Veuillez entrer des maladies' : null,
                 onChanged: (value) => _maladies = value,
               ),
+              SizedBox(height: 16),
+
+              // Champ Objectifs
               TextFormField(
                 initialValue: _objectifs,
-                decoration: InputDecoration(labelText: 'Objectifs', filled: true, fillColor: Colors.black12),
+                style: TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: 'Objectifs',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.teal.shade50,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 validator: (value) => value!.isEmpty ? 'Veuillez entrer des objectifs' : null,
                 onChanged: (value) => _objectifs = value,
               ),
+              SizedBox(height: 16),
+
+              // Champ Allergies
               TextFormField(
                 initialValue: _allergies,
-                decoration: InputDecoration(labelText: 'Allergies', filled: true, fillColor: Colors.black12),
+                style: TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: 'Allergies',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.teal.shade50,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 validator: (value) => value!.isEmpty ? 'Veuillez entrer des allergies' : null,
                 onChanged: (value) => _allergies = value,
               ),
+              SizedBox(height: 16),
+
+              // Champ Préférences Alimentaires
               TextFormField(
                 initialValue: _preferencesAlimentaires,
-                decoration: InputDecoration(labelText: 'Préférences Alimentaires', filled: true, fillColor: Colors.black12),
+                style: TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: 'Préférences Alimentaires',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.teal.shade50,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 validator: (value) => value!.isEmpty ? 'Veuillez entrer des préférences alimentaires' : null,
                 onChanged: (value) => _preferencesAlimentaires = value,
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _modifierProfil,
-                child: Text('Mettre à jour'),
+              SizedBox(height: 24), // Espacement avant le bouton
+
+              // Bouton de mise à jour
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _modifierProfil,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.teal, // Couleur teal pour le bouton
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text(
+                    'Mettre à jour',
+                    style: TextStyle(fontSize: 18, color: Colors.white), // Texte en blanc
+                  ),
+                ),
               ),
             ],
           ),

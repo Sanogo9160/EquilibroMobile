@@ -1,4 +1,5 @@
 import 'package:equilibromobile/models/profil_sante.dart';
+import 'package:equilibromobile/models/utilisateur.dart'; 
 import 'package:equilibromobile/screens/CreerProfilScreen.dart';
 import 'package:equilibromobile/screens/ModifierProfilDeSanteScreen.dart';
 import 'package:equilibromobile/services/profil_de_sante_service.dart';
@@ -11,12 +12,14 @@ class ProfilDeSanteScreen extends StatefulWidget {
 
 class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
   Future<ProfilDeSante?> _profilFuture = Future.value(null);
+  Future<Utilisateur?> _utilisateurFuture = Future.value(null);
   int? _profilId;
 
   @override
   void initState() {
     super.initState();
     _loadProfil();
+    _loadUtilisateur();
   }
 
   void _loadProfil() async {
@@ -37,6 +40,20 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
       print('Erreur lors du chargement du profil : $e');
       setState(() {
         _profilFuture = Future.value(null);
+      });
+    }
+  }
+
+  void _loadUtilisateur() async {
+    try {
+      final utilisateurData = await ProfilDeSanteService().obtenirMonUtilisateur();
+      setState(() {
+        _utilisateurFuture = Future.value(utilisateurData);
+      });
+    } catch (e) {
+      print('Erreur lors du chargement de l\'utilisateur : $e');
+      setState(() {
+        _utilisateurFuture = Future.value(null);
       });
     }
   }
@@ -101,75 +118,126 @@ class _ProfilDeSanteScreenState extends State<ProfilDeSanteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Profil de Santé')),
-      body: FutureBuilder<ProfilDeSante?>(
-        future: _profilFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<Utilisateur?>(
+        future: _utilisateurFuture,
+        builder: (context, utilisateurSnapshot) {
+          if (utilisateurSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Erreur de chargement.'));
+          if (utilisateurSnapshot.hasError) {
+            return Center(child: Text('Erreur de chargement de l\'utilisateur.'));
           }
 
-          final profil = snapshot.data;
-          if (profil == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Vous n'avez aucune donnée de profil santé disponible. Veuillez créer un profil de santé."),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _creerProfil,
-                    child: Text('Créer un Profil de Santé'),
-                  ),
-                ],
-              ),
-            );
-          }
+          return FutureBuilder<ProfilDeSante?>(
+            future: _profilFuture,
+            builder: (context, profilSnapshot) {
+              if (profilSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (profilSnapshot.hasError) {
+                return Center(child: Text('Erreur de chargement du profil.'));
+              }
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Nom: ${profil.utilisateur.nom}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text('Email: ${profil.utilisateur.email}', style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 16),
-                    Text('Maladies: ${profil.maladies.isNotEmpty ? profil.maladies.map((m) => m.nom).join(', ') : "Aucune"}'),
-                    SizedBox(height: 8),
-                    Text('Objectifs: ${profil.objectifs.isNotEmpty ? profil.objectifs.map((o) => o.nom).join(', ') : "Aucun"}'),
-                    SizedBox(height: 8),
-                    Text('Allergies: ${profil.allergies.isNotEmpty ? profil.allergies.map((a) => a.nom).join(', ') : "Aucune"}'),
-                    SizedBox(height: 8),
-                    Text('Préférences Alimentaires: ${profil.preferencesAlimentaires.isNotEmpty ? profil.preferencesAlimentaires.map((p) => p.nom).join(', ') : "Aucune"}'),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: _modifierProfil,
-                          tooltip: 'Modifier',
+              final profil = profilSnapshot.data;
+              final utilisateur = utilisateurSnapshot.data;
+
+              if (profil == null) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Vous n'avez aucune donnée de profil santé disponible. Veuillez créer un profil de santé.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _creerProfil,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.teal,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text('Créer un Profil de Santé', style: TextStyle(fontSize: 18)),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: _supprimerProfil,
-                          tooltip: 'Supprimer',
-                          color: Colors.red,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0), // Less padding to reduce height
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min, // Adjusts to content height
+                      children: [
+                        Text(
+                          'Nom: ${utilisateur?.nom ?? "Inconnu"}',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 4),
+                        Text('Email: ${utilisateur?.email ?? "Inconnu"}', style: TextStyle(fontSize: 16)),
+                        Divider(height: 16, thickness: 1),
+                        Text('Objectif de Santé', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text(profil.objectifs.isNotEmpty
+                            ? profil.objectifs.map((o) => o.nom).join(', ')
+                            : "Aucun"),
+                        SizedBox(height: 12),
+                        Text('Type de Maladie', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text(profil.maladies.isNotEmpty
+                            ? profil.maladies.map((m) => m.nom).join(', ')
+                            : "Je n'ai pas de maladie"),
+                        SizedBox(height: 12),
+                        Text('Préférences Alimentaires', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text(profil.preferencesAlimentaires.isNotEmpty
+                            ? profil.preferencesAlimentaires.map((p) => p.nom).join(', ')
+                            : "Aucune"),
+                        SizedBox(height: 12),
+                        Text('Allergies', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text(profil.allergies.isNotEmpty
+                            ? profil.allergies.map((a) => a.nom).join(', ')
+                            : "Aucune"),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.teal), // Icon color changed to teal
+                              onPressed: _modifierProfil,
+                              tooltip: 'Modifier',
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: _supprimerProfil,
+                              tooltip: 'Supprimer',
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),

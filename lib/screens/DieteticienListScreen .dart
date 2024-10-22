@@ -160,121 +160,129 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16.0),
                             ),
-                            child: Row(
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Container(
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(16.0),
-                                        bottomLeft: Radius.circular(16.0),
-                                      ),
-                                      image: dieteticien.imageUrl != null
-                                          ? DecorationImage(
-                                              image: NetworkImage(dieteticien.imageUrl!), // Récupération de l'image
-                                              fit: BoxFit.cover,
-                                            )
-                                          : DecorationImage(
-                                              image: AssetImage('assets/images/profil.png'),
-                                              fit: BoxFit.cover,
-                                            ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 3,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              dieteticien.nom,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(
-                                                _isLiked[index] ? Icons.favorite : Icons.favorite_border,
-                                                color: Color(0xFF00796B),
-                                                size: 20,
-                                              ),
-                                              onPressed: () {
-                                                _toggleLike(index);
-                                              },
-                                            ),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber,
-                                                  size: 16,
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                        height: 100,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(16.0),
+                                            bottomLeft: Radius.circular(16.0),
+                                          ),
+                                          child: Image.network(
+                                            dieteticien.imageUrl ?? '',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Image.asset(
+                                                'assets/images/profil.png',
+                                                fit: BoxFit.cover,
+                                              );
+                                            },
+                                            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                              if (loadingProgress == null) return child;
+                                              return Center(
+                                                child: CircularProgressIndicator(
+                                                  value: loadingProgress.expectedTotalBytes != null
+                                                      ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                                      : null,
                                                 ),
-                                                SizedBox(width: 4),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
                                                 Text(
-                                                  '5.0',
+                                                  dieteticien.nom,
                                                   style: TextStyle(
-                                                    color: Colors.amber,
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16,
                                                   ),
                                                 ),
+                                                IconButton(
+                                                  icon: Icon(
+                                                    _isLiked[index] ? Icons.favorite : Icons.favorite_border,
+                                                    color: Color(0xFF00796B),
+                                                    size: 20,
+                                                  ),
+                                                  onPressed: () {
+                                                    _toggleLike(index);
+                                                  },
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.star,
+                                                      color: Colors.amber,
+                                                      size: 16,
+                                                    ),
+                                                    SizedBox(width: 4),
+                                                    Text(
+                                                      '5.0',
+                                                      style: TextStyle(
+                                                        color: Colors.amber,
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          dieteticien.specialite ?? 'Spécialité non renseignée',
-                                          style: TextStyle(
-                                            color: Colors.grey[700],
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                // Logique pour appeler le diététicien
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.phone, size: 16, color: Color(0xFF00796B)),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    dieteticien.telephone ?? 'Téléphone non renseigné',
-                                                    style: TextStyle(
-                                                      color: Colors.grey[600],
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            SizedBox(width: 16),
-                                            GestureDetector(
-                                              onTap: () {
-                                                // Logique pour envoyer un message
-                                              },
-                                              child: Icon(
-                                                Icons.message,
-                                                size: 16,
-                                                color: Color(0xFF00796B),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              dieteticien.specialite ?? 'Spécialité non renseignée',
+                                              style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 14,
                                               ),
                                             ),
                                           ],
                                         ),
-                                        SizedBox(height: 8),
-                                        ElevatedButton(
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          // Logique pour appeler le diététicien
+                                        },
+                                        child: Icon(Icons.phone, size: 20, color: Color(0xFF00796B)), 
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          // Logique pour envoyer un message
+                                        },
+                                        child: Icon(
+                                          Icons.message,
+                                          size: 20,
+                                          color: Color(0xFF00796B),
+                                        ),
+                                      ),
+                                      SizedBox(width: 8), // Espacement entre les icônes et le bouton
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints.tightFor(width: 150), // Taille du bouton réduite
+                                        child: ElevatedButton(
                                           onPressed: () {
                                             Navigator.push(
                                               context,
@@ -283,18 +291,20 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                                               ),
                                             );
                                           },
+                                          child: Text(
+                                            'Prendre RDV',
+                                            style: TextStyle(color: Colors.white), // Texte en blanc
+                                          ),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xFF00796B),
-                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12.0),
                                             ),
-                                            minimumSize: Size(double.infinity, 40),
+                                            backgroundColor: Color(0xFF00796B),
                                           ),
-                                          child: Text('Prendre rendez-vous'),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

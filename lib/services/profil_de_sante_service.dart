@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:equilibromobile/models/profil_sante.dart';
+import 'package:equilibromobile/models/utilisateur.dart';
 import 'package:equilibromobile/screens/PlanRepasScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -35,39 +36,41 @@ class ProfilDeSanteService {
       throw Exception('Erreur de connexion à l\'API : $e');
     }
   }
+  
+Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil, BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('jwt_token');
 
-  Future<ProfilDeSante> ajouterProfil(ProfilDeSante profil, BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      throw Exception("Utilisateur non authentifié.");
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/ajouter'), // URL corrigée
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(profil.toJson()),
-      );
-
-      if (response.statusCode == 201) {
-        // Profil créé avec succès, naviguer vers PlanRepasScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PlanRepasScreen()),
-        );
-        return ProfilDeSante.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Erreur lors de la création du profil: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Erreur de connexion à l\'API : $e');
-    }
+  if (token == null) {
+    throw Exception("Utilisateur non authentifié.");
   }
+
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/ajouter'), // URL corrigée
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(profil.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      // Profil créé avec succès, naviguer vers PlanRepasScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PlanRepasScreen()),
+      );
+      return ProfilDeSante.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erreur lors de la création du profil: ${response.body}');
+    }
+  } catch (e) {
+    throw Exception('Erreur de connexion à l\'API : $e');
+  }
+}
+
+
 
 Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
     final prefs = await SharedPreferences.getInstance();
@@ -83,7 +86,7 @@ Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(profil.toJson()), // Assurez-vous que toJson() est correct
+      body: jsonEncode(profil.toJson()), 
     );
 
     if (response.statusCode == 200) {
@@ -109,6 +112,34 @@ Future<ProfilDeSante> mettreAJourProfil(int id, ProfilDeSante profil) async {
       },
     );
   }
+
+  //
+  Future<Utilisateur?> obtenirMonUtilisateur() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('jwt_token');
+
+  if (token == null) {
+    throw Exception("Utilisateur non authentifié.");
+  }
+
+  try {
+    final response = await http.get(
+      Uri.parse('${AppConfig.baseUrl}/utilisateurs/current'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return Utilisateur.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erreur lors de la récupération de l\'utilisateur');
+    }
+  } catch (e) {
+    throw Exception('Erreur de connexion à l\'API : $e');
+  }
+}
   }
 
 
