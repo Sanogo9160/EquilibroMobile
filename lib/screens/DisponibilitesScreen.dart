@@ -62,6 +62,7 @@ class _DisponibilitesScreenState extends State<DisponibilitesScreen> {
         "utilisateurId": utilisateurId,
         "dieteticienId": widget.dieteticien.id,
         "dateConsultation": disponibilite['dateDebut'],
+        "status": "en attente" // statut pour la réservation
       }),
     );
 
