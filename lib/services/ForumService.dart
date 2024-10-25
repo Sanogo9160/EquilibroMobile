@@ -113,4 +113,52 @@ class ForumService {
 
     return response.statusCode == 200;
   }
+
+// Supprimer un commentaire
+Future<bool> deleteComment(int commentId) async {
+  final url = Uri.parse('$_baseUrl/commentaires/supprimer/$commentId');
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('jwt_token');
+
+  if (token == null) {
+    throw Exception('Token non trouvé. L\'utilisateur doit être authentifié.');
+  }
+
+  final response = await http.delete(
+    url,
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  return response.statusCode == 204; // No Content
+}
+
+// Modifier un commentaire
+Future<bool> editComment(int commentId, String newContent) async {
+  final url = Uri.parse('$_baseUrl/commentaires/modifier/$commentId');
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('jwt_token');
+
+  if (token == null) {
+    throw Exception('Token non trouvé. L\'utilisateur doit être authentifié.');
+  }
+
+  final body = jsonEncode({
+    'contenu': newContent, 
+  });
+
+  final response = await http.put(
+    url,
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+    },
+    body: body,
+  );
+
+  return response.statusCode == 200; // OK
+}
+
 }
