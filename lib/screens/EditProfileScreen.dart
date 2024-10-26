@@ -43,24 +43,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 initialValue: _nom,
                 decoration: const InputDecoration(labelText: 'Nom'),
-                style: const TextStyle(color: Colors.black), 
+                style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _nom = value ?? '',
               ),
               TextFormField(
                 initialValue: _email,
                 decoration: const InputDecoration(labelText: 'Email'),
-                style: const TextStyle(color: Colors.black), 
+                style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _email = value ?? '',
               ),
               TextFormField(
                 initialValue: _telephone,
                 decoration: const InputDecoration(labelText: 'Téléphone'),
-                style: const TextStyle(color: Colors.black), 
+                style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _telephone = value,
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Nouveau Mot de Passe'),
-                style: const TextStyle(color: Colors.black), 
+                style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _motDePasse = value,
                 obscureText: true,
               ),
@@ -80,7 +80,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      // Récupère l'ID de l'utilisateur
+      final utilisateurId = await _authService.getUtilisateurId();
+      if (utilisateurId == null) {
+        print("Erreur : ID utilisateur non trouvé");
+        return;
+      }
+
       final success = await _authService.updateUserProfile(
+        utilisateurId,
         _nom,
         _email,
         _telephone,
@@ -90,7 +98,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (success) {
         Navigator.pop(context);
       } else {
-        
+        print("Erreur lors de la mise à jour du profil.");
       }
     }
   }

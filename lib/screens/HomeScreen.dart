@@ -1,3 +1,4 @@
+
 import 'package:equilibromobile/screens/DieteticienListScreen%20.dart';
 import 'package:flutter/material.dart';
 import 'package:equilibromobile/screens/CommunauteScreen.dart';
@@ -50,13 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                IconButton(
-                  icon: Icon(Icons.logout),
-                  onPressed: () async {
-                    await _authService.logout();
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
-                ),
+                // L'icône de déconnexion a été supprimée
               ],
             )
           : null, // Pas d'AppBar pour d'autres écrans
@@ -170,8 +165,7 @@ class _MainContentScreenState extends State<MainContentScreen> {
                 _createButton('Consultation', Icons.local_hospital, onPressed: () {
                   Navigator.push(
                     context,
-                     MaterialPageRoute(builder: (context) => DieteticienListScreen())
-                    //MaterialPageRoute(builder: (context) => ConsultationScreen()),
+                    MaterialPageRoute(builder: (context) => DieteticienListScreen()),
                   );
                 }),
               ],

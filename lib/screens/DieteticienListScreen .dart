@@ -5,6 +5,7 @@ import 'package:equilibromobile/screens/ReserverConsultationScreen.dart';
 import 'package:equilibromobile/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class DieteticienListScreen extends StatefulWidget {
   @override
@@ -78,6 +79,23 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
     setState(() {
       _isLiked[index] = !_isLiked[index];
     });
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    await launchUrl(launchUri);
+  }
+
+  void _sendMessage(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'https',
+      host: 'wa.me',
+      path: phoneNumber,
+    );
+    await launchUrl(launchUri);
   }
 
   @override
@@ -178,9 +196,12 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                                             dieteticien.imageUrl ?? '',
                                             fit: BoxFit.cover,
                                             errorBuilder: (context, error, stackTrace) {
-                                              return Image.asset(
-                                                'assets/images/profil.png',
-                                                fit: BoxFit.cover,
+                                              return Center(
+                                                child: Icon(
+                                                  Icons.person,
+                                                  size: 60,
+                                                  color: Colors.grey,
+                                                ),
                                               );
                                             },
                                             loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
@@ -207,11 +228,14 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text(
-                                                  dieteticien.nom,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
+                                                Expanded(
+                                                  child: Text(
+                                                    dieteticien.nom,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 16,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                                 IconButton(
@@ -265,13 +289,13 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          // Logique pour appeler le diététicien
+                                          _makePhoneCall(dieteticien.telephone ?? ''); // Numero telephone ne doit pas etre null
                                         },
-                                        child: Icon(Icons.phone, size: 20, color: Color(0xFF00796B)), 
+                                        child: Icon(Icons.phone, size: 20, color: Color(0xFF00796B)),
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          // Logique pour envoyer un message
+                                          _sendMessage(dieteticien.telephone ?? ''); 
                                         },
                                         child: Icon(
                                           Icons.message,
@@ -279,9 +303,9 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                                           color: Color(0xFF00796B),
                                         ),
                                       ),
-                                      SizedBox(width: 8), // Espacement entre les icônes et le bouton
+                                      SizedBox(width: 8),
                                       ConstrainedBox(
-                                        constraints: BoxConstraints.tightFor(width: 150), // Taille du bouton réduite
+                                        constraints: BoxConstraints.tightFor(width: 150),
                                         child: ElevatedButton(
                                           onPressed: () {
                                             Navigator.push(
@@ -293,7 +317,7 @@ class _DieteticienListScreenState extends State<DieteticienListScreen> {
                                           },
                                           child: Text(
                                             'Prendre RDV',
-                                            style: TextStyle(color: Colors.white), // Texte en blanc
+                                            style: TextStyle(color: Colors.white),
                                           ),
                                           style: ElevatedButton.styleFrom(
                                             padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),

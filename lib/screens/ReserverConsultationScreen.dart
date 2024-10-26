@@ -4,6 +4,7 @@ import 'package:equilibromobile/services/consultation-service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart'; // Importer le package intl
 import '../config.dart';
 import '../models/dieteticien.dart';
 import '../services/auth_service.dart';
@@ -160,9 +161,10 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Aligner à gauche
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TableCalendar(
+                locale: 'fr_FR', // Configurer le calendrier en français
                 focusedDay: _focusedDay,
                 firstDay: DateTime.now(),
                 lastDay: DateTime(2100),
@@ -215,10 +217,14 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
                   itemCount: _selectedEvents.length,
                   itemBuilder: (context, index) {
                     final disponibilite = _selectedEvents[index];
+                    // Formatter les dates en anglais
+                    String dateDebut = DateFormat('EEEE, d MMMM yyyy', 'en_US').format(DateTime.parse(disponibilite['dateDebut']));
+                    String dateFin = DateFormat('EEEE, d MMMM yyyy', 'en_US').format(DateTime.parse(disponibilite['dateFin']));
+
                     return ListTile(
                       title: Text(
-                        'De: ${disponibilite['dateDebut']} à ${disponibilite['dateFin']}',
-                        style: TextStyle(color: Colors.black), // Texte en noir
+                        'De: $dateDebut à $dateFin',
+                        style: TextStyle(color: Colors.black),
                       ),
                       onTap: () {
                         setState(() {

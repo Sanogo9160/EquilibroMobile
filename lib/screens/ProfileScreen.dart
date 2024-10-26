@@ -11,12 +11,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        // Suppression de l'icône de flèche de retour
       ),
       body: FutureBuilder<Utilisateur?>(
         future: _authService.getCurrentUser(),
@@ -48,11 +43,9 @@ class ProfileScreen extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.grey[300],
-                      child: const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.white,
-                      ),
+                      backgroundImage: utilisateur.imageUrl != null
+                          ? NetworkImage(utilisateur.imageUrl!) // Utilisation de l'image de l'utilisateur
+                          : const AssetImage('assets/default_avatar.png') as ImageProvider, // Image par défaut
                     ),
                   ),
                   const SizedBox(height: 16.0),

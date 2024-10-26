@@ -67,41 +67,36 @@ class AuthService extends ChangeNotifier {
     final token = await getToken();
     if (token == null) return null;
 
-    Map<String, dynamic> decodedToken = Jwt.parseJwt(token); // Utilisation de jwt_decode
-    print('Decoded token: $decodedToken'); 
-    return decodedToken['id']; 
+    Map<String, dynamic> decodedToken = Jwt.parseJwt(token);
+    print('Decoded token: $decodedToken');
+    return decodedToken['id'];  // Vérifie si l'ID est présent dans le token
   }
-  
-  Future<bool> updateUserProfile(
-      String nom, String email, String? telephone, String? motDePasse) async {
-    final token = await getToken();
-    if (token == null) return false;
 
-    final url = Uri.parse('$_baseUrl/utilisateurs/update'); 
-    try {
-      final response = await http.put(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'nom': nom,
-          'email': email,
-          'telephone': telephone,
-          'motDePasse': motDePasse,
-        }),
-      );
+Future<bool> updateUserProfile(int utilisateurId, String nom, String email, String? telephone, String? motDePasse) async {
+  final token = await getToken();
+  if (token == null) return false;
 
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Erreur lors de la mise à jour du profil : ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Erreur lors de la mise à jour du profil : $e');
-      return false;
-    }
+  final response = await http.put(
+    Uri.parse("$_baseUrl/utilisateurs/modifier/$utilisateurId"),
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': 'Bearer $token', 
+    },
+    body: jsonEncode({
+      "nom": nom,
+      "email": email,
+      "telephone": telephone,
+      "motDePasse": motDePasse,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    print('Erreur lors de la mise à jour du profil : ${response.body}');
+    return false;
   }
+}
+
+
 }
