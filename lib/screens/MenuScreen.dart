@@ -1,3 +1,4 @@
+/*
 import 'package:equilibromobile/models/recipe.dart';
 import 'package:equilibromobile/screens/RecipeDetailScreen.dart';
 import 'package:flutter/material.dart';
@@ -82,3 +83,5 @@ class RecipeTile extends StatelessWidget {
     );
   }
 }
+
+*/

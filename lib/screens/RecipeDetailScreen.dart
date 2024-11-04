@@ -1,4 +1,4 @@
-
+/*
 import 'package:equilibromobile/models/recipe.dart';
 import 'package:flutter/material.dart';
 
@@ -91,3 +91,5 @@ class RecipeDetailScreen extends StatelessWidget {
     }
   }
 }
+
+*/

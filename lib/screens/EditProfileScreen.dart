@@ -33,8 +33,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modifier le Profil'),
+        backgroundColor: Colors.teal,
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.teal[50],
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -42,32 +44,82 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               TextFormField(
                 initialValue: _nom,
-                decoration: const InputDecoration(labelText: 'Nom'),
+                decoration: InputDecoration(
+                  labelText: 'Nom',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.teal),
+                  ),
+                ),
                 style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _nom = value ?? '',
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 initialValue: _email,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.teal),
+                  ),
+                ),
                 style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _email = value ?? '',
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 initialValue: _telephone,
-                decoration: const InputDecoration(labelText: 'Téléphone'),
+                decoration: InputDecoration(
+                  labelText: 'Téléphone',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.teal),
+                  ),
+                ),
                 style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _telephone = value,
               ),
+              const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Nouveau Mot de Passe'),
+                decoration: InputDecoration(
+                  labelText: 'Nouveau Mot de Passe',
+                  labelStyle: TextStyle(color: Colors.teal),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.teal),
+                  ),
+                ),
                 style: const TextStyle(color: Colors.black),
                 onSaved: (value) => _motDePasse = value,
                 obscureText: true,
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Sauvegarder'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _submitForm,
+                  child: const Text('Sauvegarder'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.teal,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero, // Coins carrés
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
               ),
             ],
           ),
