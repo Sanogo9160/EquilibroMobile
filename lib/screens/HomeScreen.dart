@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _screens = [
       MainContentScreen(),
-      //MenuScreen(),
+      MenuScreen(),
       CommunauteScreen(),
       VertusScreen(),
       ProfileScreen(),

@@ -27,9 +27,9 @@ class _InscriptionPageState extends State<InscriptionPage> {
   // Fonction pour gérer l'inscription
   Future<void> _inscrireUtilisateur() async {
     if (_formKey.currentState!.validate() && _sexe != null) {
-      final String nom = _nomController.text;
-      final String email = _emailController.text;
-      final String telephone = _telephoneController.text;
+      final String nom = _nomController.text.trim();
+      final String email = _emailController.text.trim();
+      final String telephone = _telephoneController.text.trim();
       final String motDePasse = _motDePasseController.text;
       final double poids = double.parse(_poidsController.text);
       final double taille = double.parse(_tailleController.text);
@@ -124,10 +124,12 @@ class _InscriptionPageState extends State<InscriptionPage> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value!.isEmpty) {
+                    final trimmedValue = value!.trim();
+                    if (trimmedValue.isEmpty) {
                       return 'Veuillez entrer votre email';
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                        .hasMatch(trimmedValue)) {
                       return 'Veuillez entrer un email valide';
                     }
                     return null;

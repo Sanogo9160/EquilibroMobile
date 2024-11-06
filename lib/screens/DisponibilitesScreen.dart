@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:equilibromobile/config.dart';
+import 'package:equilibromobile/models/dieteticien.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../config.dart';
-import '../models/dieteticien.dart';
+import 'package:intl/intl.dart';
 import '../services/auth_service.dart';
 
 class DisponibilitesScreen extends StatefulWidget {
@@ -23,27 +24,32 @@ class _DisponibilitesScreenState extends State<DisponibilitesScreen> {
     _fetchDisponibilites();
   }
 
+  // Fetch availability
   Future<void> _fetchDisponibilites() async {
-    final authService = AuthService();
-    String? token = await authService.getToken();
+    try {
+      final authService = AuthService();
+      String? token = await authService.getToken();
 
-    final response = await http.get(
-      Uri.parse(
-          '${AppConfig.baseUrl}/disponibilites/dieteticien/${widget.dieteticien.id}'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _disponibilites = json.decode(response.body);
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors du chargement des disponibilités')),
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/disponibilites/dieteticien/${widget.dieteticien.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _disponibilites = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Erreur lors du chargement des disponibilités');
+      }
+    } catch (e) {
+      print('Erreur de chargement: $e');
     }
   }
 
@@ -62,7 +68,7 @@ class _DisponibilitesScreenState extends State<DisponibilitesScreen> {
         "utilisateurId": utilisateurId,
         "dieteticienId": widget.dieteticien.id,
         "dateConsultation": disponibilite['dateDebut'],
-        "status": "en attente" // statut pour la réservation
+        "status": "en attente"
       }),
     );
 
@@ -84,14 +90,18 @@ class _DisponibilitesScreenState extends State<DisponibilitesScreen> {
         title: Text('Disponibilités de ${widget.dieteticien.nom}'),
       ),
       body: _disponibilites.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: Text('Aucune disponibilité disponible.'))
           : ListView.builder(
               itemCount: _disponibilites.length,
               itemBuilder: (context, index) {
                 final disponibilite = _disponibilites[index];
+                DateTime dateDebut = DateTime.parse(disponibilite['dateDebut']);
+                DateTime dateFin = DateTime.parse(disponibilite['dateFin']);
+                String formattedDateDebut = DateFormat('dd/MM/yyyy HH:mm').format(dateDebut);
+                String formattedDateFin = DateFormat('dd/MM/yyyy HH:mm').format(dateFin);
+
                 return ListTile(
-                  title: Text(
-                      'De: ${disponibilite['dateDebut']} à ${disponibilite['dateFin']}'),
+                  title: Text('De: $formattedDateDebut à $formattedDateFin'),
                   onTap: () => reserverConsultation(disponibilite),
                 );
               },

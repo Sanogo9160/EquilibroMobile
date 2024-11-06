@@ -13,111 +13,54 @@ class ForumDetailScreen extends StatefulWidget {
 class _ForumDetailScreenState extends State<ForumDetailScreen> {
   Map<String, dynamic>? _forum;
   bool _isLoading = true;
-  TextEditingController _commentController = TextEditingController(); // Utilisation d'un contrôleur
+  TextEditingController _commentController = TextEditingController();
   List<bool> _expandedComments = [];
 
   @override
   void initState() {
     super.initState();
+    _commentController.addListener(_onCommentChanged);
     _loadForumDetails();
+  }
+
+  void _onCommentChanged() {
+    setState(() {}); 
   }
 
   Future<void> _loadForumDetails() async {
     try {
       final forumService = ForumService();
       final forumDetails = await forumService.getForumDetails(widget.forumId);
+      
+      print('Forum Details: $forumDetails'); // Debugging output
+
       setState(() {
         _forum = forumDetails;
         _isLoading = false;
-        _expandedComments = List<bool>.filled(forumDetails['commentaires'].length, false);
+        _expandedComments = List<bool>.filled(
+            (forumDetails['commentaires'] as List?)?.length ?? 0, false);
       });
     } catch (e) {
       print('Erreur lors de la récupération des détails du forum: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   Future<void> _addComment() async {
     final forumService = ForumService();
-    await forumService.addComment(widget.forumId, _commentController.text);
-    await _loadForumDetails();
-    _commentController.clear(); // Vider le champ de texte
-  }
-
-  Future<void> _deleteComment(int commentId) async {
-    final forumService = ForumService();
-    await forumService.deleteComment(commentId);
-    await _loadForumDetails();
-  }
-
-  Future<void> _editComment(int commentId, String newContent) async {
-    final forumService = ForumService();
-    await forumService.editComment(commentId, newContent);
-    await _loadForumDetails();
-  }
-
-  void _showEditDialog(int commentId, String currentContent) {
-    TextEditingController controller = TextEditingController(text: currentContent);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Modifier le commentaire'),
-          content: TextField(
-            controller: controller,
-            style: const TextStyle(color: Colors.black), // Texte noir
-            decoration: const InputDecoration(hintText: "Nouveau contenu"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _editComment(commentId, controller.text);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Modifier'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteConfirmationDialog(int commentId) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Confirmer la suppression'),
-          content: const Text('Êtes-vous sûr de vouloir supprimer ce commentaire ?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Annuler
-              },
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () {
-                _deleteComment(commentId);
-                Navigator.of(context).pop(); // Fermer le dialogue
-              },
-              child: const Text('Supprimer'),
-            ),
-          ],
-        );
-      },
-    );
+    if (_commentController.text.isNotEmpty) {
+      await forumService.addComment(widget.forumId, _commentController.text);
+      await _loadForumDetails();
+      _commentController.clear(); 
+    }
   }
 
   @override
   void dispose() {
-    _commentController.dispose(); // Nettoyer le contrôleur
+    _commentController.removeListener(_onCommentChanged);
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -151,83 +94,68 @@ class _ForumDetailScreenState extends State<ForumDetailScreen> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: _forum?['commentaires']?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      final comment = _forum?['commentaires'][index];
-                      final author = comment['auteur'];
-                      final avatarInitial = author['email'][0].toUpperCase();
+                  child: (_forum?['commentaires'] as List?)?.isEmpty ?? true
+                      ? Center(child: Text("Aucun commentaire pour l'instant"))
+                      : ListView.builder(
+                          itemCount: (_forum?['commentaires'] as List?)?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            final comment = _forum?['commentaires'][index];
+                            final author = comment['auteur'];
+                            final avatarInitial = author['email'][0].toUpperCase();
 
-                      String contenu = comment['contenu'];
-                      int commentId = comment['id'];
+                            String contenu = comment['contenu'];
+                            int commentId = comment['id'];
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _expandedComments[index] = !_expandedComments[index];
-                            });
-                          },
-                          child: Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.teal,
-                                child: Text(
-                                  avatarInitial,
-                                  style: const TextStyle(color: Colors.white),
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _expandedComments[index] = !_expandedComments[index];
+                                  });
+                                },
+                                child: Card(
+                                  elevation: 3,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: Colors.teal,
+                                      child: Text(
+                                        avatarInitial,
+                                        style: const TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      _expandedComments[index]
+                                          ? contenu
+                                          : (contenu.length > 100 ? '${contenu.substring(0, 100)}...' : contenu),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Par ${author['email']}',
+                                          style: const TextStyle(color: Colors.grey),
+                                        ),
+                                        if (!_expandedComments[index] && contenu.length > 100)
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _expandedComments[index] = true;
+                                              });
+                                            },
+                                            child: const Text('Voir plus', style: TextStyle(color: Colors.teal)),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
-                              title: Text(
-                                _expandedComments[index]
-                                    ? contenu
-                                    : (contenu.length > 100 ? '${contenu.substring(0, 100)}...' : contenu),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Par ${author['email']}',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                  if (!_expandedComments[index] && contenu.length > 100)
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _expandedComments[index] = true;
-                                        });
-                                      },
-                                      child: const Text('Voir plus', style: TextStyle(color: Colors.teal)),
-                                    ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit, color: Colors.teal),
-                                        onPressed: () {
-                                          _showEditDialog(commentId, contenu);
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red),
-                                        onPressed: () {
-                                          _showDeleteConfirmationDialog(commentId);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -235,13 +163,8 @@ class _ForumDetailScreenState extends State<ForumDetailScreen> {
                     children: [
                       Expanded(
                         child: TextField(
-                          controller: _commentController, // Assignation du contrôleur
-                          onChanged: (value) {
-                            setState(() {
-                              // On peut garder cette partie, mais elle n'est plus nécessaire si vous utilisez le contrôleur
-                            });
-                          },
-                          style: const TextStyle(color: Colors.black), // Texte noir
+                          controller: _commentController,
+                          style: const TextStyle(color: Colors.black),
                           decoration: InputDecoration(
                             hintText: 'Ajouter un commentaire',
                             filled: true,
@@ -272,3 +195,5 @@ class _ForumDetailScreenState extends State<ForumDetailScreen> {
     );
   }
 }
+
+

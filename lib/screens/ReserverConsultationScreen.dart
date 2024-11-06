@@ -4,7 +4,7 @@ import 'package:equilibromobile/services/consultation-service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart'; // Importer le package intl
+import 'package:intl/intl.dart'; 
 import '../config.dart';
 import '../models/dieteticien.dart';
 import '../services/auth_service.dart';
@@ -15,10 +15,12 @@ class ReserverConsultationScreen extends StatefulWidget {
   ReserverConsultationScreen({required this.dieteticien});
 
   @override
-  _ReserverConsultationScreenState createState() => _ReserverConsultationScreenState();
+  _ReserverConsultationScreenState createState() =>
+      _ReserverConsultationScreenState();
 }
 
-class _ReserverConsultationScreenState extends State<ReserverConsultationScreen> {
+class _ReserverConsultationScreenState
+    extends State<ReserverConsultationScreen> {
   final CalendarFormat _calendarFormat = CalendarFormat.month;
   Map<DateTime, List<Map<String, dynamic>>> _events = {};
   List<Map<String, dynamic>> _selectedEvents = [];
@@ -35,6 +37,7 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
     _fetchDisponibilites();
   }
 
+  // Fonction pour récupérer les disponibilités du diététicien
   Future<void> _fetchDisponibilites() async {
     final authService = AuthService();
     String? token = await authService.getToken();
@@ -51,6 +54,7 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
       final disponibilites = json.decode(response.body) as List<dynamic>;
       Map<DateTime, List<Map<String, dynamic>>> events = {};
 
+      // Traitement des disponibilités récupérées
       for (var dispo in disponibilites) {
         DateTime dateDebut = DateTime.parse(dispo['dateDebut']);
         DateTime dateFin = DateTime.parse(dispo['dateFin']);
@@ -76,6 +80,7 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
         });
       }
     } else {
+      // Gestion des erreurs API lors du chargement des disponibilités
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur lors du chargement des disponibilités')),
@@ -84,6 +89,7 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
     }
   }
 
+  // Fonction pour réserver une consultation
   Future<void> reserverConsultation() async {
     if (_selectedDisponibilite == null) {
       print('Aucun créneau sélectionné');
@@ -164,7 +170,7 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TableCalendar(
-                locale: 'fr_FR', // Configurer le calendrier en français
+                locale: 'fr_FR',
                 focusedDay: _focusedDay,
                 firstDay: DateTime.now(),
                 lastDay: DateTime(2100),
@@ -206,126 +212,65 @@ class _ReserverConsultationScreenState extends State<ReserverConsultationScreen>
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
-                  outsideDaysVisible: false,
                 ),
               ),
-              const SizedBox(height: 16.0),
-              if (_selectedEvents.isNotEmpty) ...[
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: _selectedEvents.length,
-                  itemBuilder: (context, index) {
-                    final disponibilite = _selectedEvents[index];
-                    // Formatter les dates en anglais
-                    String dateDebut = DateFormat('EEEE, d MMMM yyyy', 'en_US').format(DateTime.parse(disponibilite['dateDebut']));
-                    String dateFin = DateFormat('EEEE, d MMMM yyyy', 'en_US').format(DateTime.parse(disponibilite['dateFin']));
-
-                    return ListTile(
-                      title: Text(
-                        'De: $dateDebut à $dateFin',
-                        style: TextStyle(color: Colors.black),
+              // Sélectionner heure de début et heure de fin
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Heure de début :'),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: 'Sélectionnez une heure de début',
                       ),
-                      onTap: () {
-                        setState(() {
-                          _selectedDisponibilite = disponibilite;
-                        });
+                      controller: TextEditingController(text: _selectedTimeDebut),
+                      onTap: () async {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (time != null) {
+                          setState(() {
+                            _selectedTimeDebut = time.format(context);
+                          });
+                        }
                       },
-                      selected: _selectedDisponibilite == disponibilite,
-                    );
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                // Dropdown pour l'heure de début 
-                DropdownButtonFormField<String>(
-                  value: _selectedTimeDebut,
-                  hint: Text('Sélectionner l\'heure de début'),
-                  items: [
-                    '09:00',
-                    '10:00',
-                    '11:00',
-                    '14:00',
-                    '15:00',
-                    '16:00',
-                  ].map((time) {
-                    return DropdownMenuItem(
-                      value: time,
-                      child: Text(time),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTimeDebut = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Heure de début',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                // Dropdown pour l'heure de fin
-                DropdownButtonFormField<String>(
-                  value: _selectedTimeFin,
-                  hint: Text('Sélectionner l\'heure de fin'),
-                  items: [
-                    '10:00',
-                    '11:00',
-                    '12:00',
-                    '15:00',
-                    '16:00',
-                    '17:00',
-                  ].map((time) {
-                    return DropdownMenuItem(
-                      value: time,
-                      child: Text(time),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTimeFin = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Heure de fin',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                // Champ de texte pour le motif
-                TextField(
-                  controller: _motifController,
-                  decoration: InputDecoration(
-                    labelText: 'Motif de consultation',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                // Bouton Réserver élargi
-                Container(
-                  width: double.infinity, // Prend toute la largeur disponible
-                  child: ElevatedButton(
-                    onPressed: reserverConsultation,
-                    child: Text(
-                      'Réserver',
-                      style: TextStyle(color: Colors.white),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
+                    SizedBox(height: 10),
+                    Text('Heure de fin :'),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: 'Sélectionnez une heure de fin',
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+                      controller: TextEditingController(text: _selectedTimeFin),
+                      onTap: () async {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (time != null) {
+                          setState(() {
+                            _selectedTimeFin = time.format(context);
+                          });
+                        }
+                      },
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
+              // Saisie du motif
+              TextFormField(
+                controller: _motifController,
+                decoration: InputDecoration(labelText: 'Motif de consultation'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: reserverConsultation,
+                child: Text('Réserver'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+              ),
             ],
           ),
         ),
